@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shell 30天系统学习计划</title>
+<style>
+:root {
+  --bg: #0c0e14;
+  --surface: #141822;
+  --card: #1b2030;
+  --card-hover: #222840;
+  --border: rgba(255,255,255,0.07);
+  --text: #e4e6ef;
+  --muted: #7a7f94;
+  --accent: #3ecf8e;
+  --accent2: #38bdf8;
+  --accent3: #f472b6;
+  --amber: #fbbf24;
+  --green: #3ecf8e;
+  --red: #ef4444;
+  --cursor: #3ecf8e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'SF Mono','Fira Code','Cascadia Code','JetBrains Mono',monospace;min-height:100vh}
+::selection{background:var(--accent);color:#000}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+
+.header{background:linear-gradient(160deg,#0d1117 0%,#161b22 40%,#0d1117 100%);padding:2.5rem 1.5rem 2rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header::before{content:'$ ';position:absolute;top:20px;left:20px;font-size:0.7rem;color:var(--muted);opacity:0.3}
+.header::after{content:'';position:absolute;top:0;right:0;width:300px;height:300px;background:radial-gradient(circle,rgba(62,207,142,0.06) 0%,transparent 70%);pointer-events:none}
+.header-inner{max-width:960px;margin:0 auto;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.logo-icon{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#3ecf8e,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#000}
+.logo h1{font-size:1.3rem;font-weight:600;color:var(--text);letter-spacing:-0.5px}
+.logo h1 span{color:var(--accent)}
+
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:1rem}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:100px;flex:1}
+.stat-label{font-size:0.65rem;text-transform:uppercase;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+.stat-val{font-size:1.3rem;font-weight:700;color:var(--accent)}
+.stat-val.blue{color:var(--accent2)}
+.stat-val.pink{color:var(--accent3)}
+.stat-val.amber{color:var(--amber)}
+
+.progress-bar-wrap{margin-top:1rem;background:var(--surface);border-radius:4px;height:6px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width 0.5s ease}
+
+.controls{max-width:960px;margin:1.5rem auto 0;padding:0 1.5rem;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:0.8rem;outline:none;transition:border-color 0.2s}
+.search-box:focus{border-color:var(--accent)}
+.search-box::placeholder{color:var(--muted)}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 14px;color:var(--muted);font-family:inherit;font-size:0.72rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(62,207,142,0.05)}
+
+.content{max-width:960px;margin:1.5rem auto;padding:0 1.5rem 3rem}
+.phase-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin:2rem 0 1rem;padding-left:4px;display:flex;align-items:center;gap:8px}
+.phase-title::before{content:'#';color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.25s ease;position:relative;overflow:hidden}
+.card:hover{background:var(--card-hover);border-color:rgba(62,207,142,0.2);transform:translateY(-2px)}
+.card.completed{border-color:rgba(62,207,142,0.3)}
+.card.completed::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+.card.today{border-color:rgba(56,189,248,0.4);box-shadow:0 0 20px rgba(56,189,248,0.08)}
+.card.today::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2)}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.day-num{font-size:0.65rem;color:var(--muted);letter-spacing:1px}
+.badge{font-size:0.6rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge.done{background:rgba(62,207,142,0.15);color:var(--accent)}
+.badge.now{background:rgba(56,189,248,0.15);color:var(--accent2)}
+.card-title{font-size:0.88rem;font-weight:600;color:var(--text);margin-bottom:8px;font-family:'SF Pro Display',-apple-system,sans-serif}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:0.6rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid rgba(255,255,255,0.05)}
+.card-preview{font-size:0.68rem;color:var(--muted);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-foot{display:flex;justify-content:space-between;align-items:center}
+.complete-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:0.65rem;color:var(--muted);cursor:pointer;font-family:inherit;transition:all 0.2s}
+.complete-btn:hover{border-color:var(--accent);color:var(--accent)}
+.complete-btn.done{background:rgba(62,207,142,0.1);border-color:var(--accent);color:var(--accent)}
+.detail-btn{background:none;border:none;color:var(--accent2);font-size:0.68rem;cursor:pointer;font-family:inherit;padding:4px 0}
+.detail-btn:hover{text-decoration:underline}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:100;justify-content:center;align-items:flex-start;padding:2rem 1rem;overflow-y:auto;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:760px;width:100%;padding:2rem;position:relative;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:4px;font-family:inherit}
+.modal-close:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.modal-day{font-size:0.65rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.modal-title{font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:6px;font-family:'SF Pro Display',-apple-system,sans-serif}
+.modal-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem}
+.topic-block{margin-bottom:1.5rem;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.topic-head{padding:12px 16px;background:rgba(255,255,255,0.02);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s}
+.topic-head:hover{background:rgba(255,255,255,0.04)}
+.topic-name{font-size:0.85rem;font-weight:600;color:var(--accent2)}
+.topic-toggle{font-size:0.7rem;color:var(--muted);transition:transform 0.2s}
+.topic-body{padding:0 16px 16px;display:none}
+.topic-body.open{display:block}
+.topic-explain{font-size:0.78rem;color:var(--muted);line-height:1.7;margin:12px 0;font-family:'SF Pro Text',-apple-system,sans-serif}
+pre.code-block{background:#0d1117;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:14px 16px;overflow-x:auto;font-size:0.75rem;line-height:1.7;color:#c9d1d9;margin:10px 0;position:relative}
+pre.code-block .comment{color:#8b949e}
+pre.code-block .keyword{color:#ff7b72}
+pre.code-block .string{color:#a5d6ff}
+pre.code-block .var{color:#ffa657}
+pre.code-block .cmd{color:#79c0ff}
+.tip-box{background:rgba(62,207,142,0.06);border:1px solid rgba(62,207,142,0.15);border-radius:6px;padding:10px 14px;font-size:0.72rem;color:var(--accent);line-height:1.6;margin-top:10px}
+.tip-box::before{content:'TIP: ';font-weight:700}
+.exercise-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.15);border-radius:6px;padding:12px 14px;margin-top:1.5rem}
+.exercise-box h4{font-size:0.72rem;color:var(--accent2);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.exercise-box p{font-size:0.76rem;color:var(--text);line-height:1.7;font-family:'SF Pro Text',-apple-system,sans-serif}
+.modal-complete{display:block;width:100%;margin-top:1.5rem;padding:10px;background:rgba(62,207,142,0.1);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-family:inherit;font-size:0.8rem;cursor:pointer;font-weight:600;transition:all 0.2s}
+.modal-complete:hover{background:rgba(62,207,142,0.2)}
+.modal-complete.done{background:var(--accent);color:#000}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:12px 20px;font-size:0.78rem;color:var(--accent);z-index:200;transition:transform 0.4s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){
+  .header{padding:1.5rem 1rem 1.5rem}
+  .controls{padding:0 1rem}
+  .content{padding:0 1rem 3rem}
+  .grid{grid-template-columns:1fr}
+  .stats-row{flex-direction:column}
+  .modal{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">$_</div>
+      <h1>Shell <span>30天</span>系统学习</h1>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-label">已完成</div><div class="stat-val" id="s-done">0/30</div></div>
+      <div class="stat-box"><div class="stat-label">连续天数</div><div class="stat-val blue" id="s-streak">0</div></div>
+      <div class="stat-box"><div class="stat-label">当前阶段</div><div class="stat-val pink" id="s-phase">—</div></div>
+      <div class="stat-box"><div class="stat-label">总进度</div><div class="stat-val amber" id="s-pct">0%</div></div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="controls">
+  <input class="search-box" id="searchInput" placeholder="搜索课程、命令、关键词..." oninput="render()">
+  <button class="filter-btn active" onclick="setFilter('all')">全部</button>
+  <button class="filter-btn" onclick="setFilter('todo')">待学</button>
+  <button class="filter-btn" onclick="setFilter('done')">已完成</button>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const startDate = "2026-03-22";
+let completed = JSON.parse(localStorage.getItem("shell30_done") || "[]");
+let currentFilter = "all";
+
+const curriculum = [
+  {
+    phase: "第一阶段：Shell 基础入门",
+    desc: "命令行基本操作与文件系统",
+    days: [
+      {
+        day:1, title:"终端初体验：命令行世界", tags:["terminal","基础"],
+        topics:[
+          {name:"什么是 Shell / Bash / Terminal",
+           explain:"Shell 是操作系统的命令行解释器，Bash（Bourne Again Shell）是最流行的 Shell。Terminal 是你跟 Shell 交互的窗口。就像 Python 有解释器一样，Shell 也是一种编程语言，但它天生就是为操作文件和程序而设计的。",
+           code:"# 查看当前使用的 Shell\necho $SHELL\n\n# 查看 Bash 版本\nbash --version\n\n# 查看所有可用的 Shell\ncat /etc/shells\n\n# 切换到 bash\nbash\n\n# 查看当前用户\nwhoami\n\n# 查看主机名\nhostname",
+           tip:"Mac 新版默认是 zsh，但 zsh 和 bash 语法 95% 兼容，学 bash 等于两个都会了"},
+          {name:"命令的基本结构",
+           explain:"所有 Shell 命令都遵循一个格式：命令 [选项] [参数]。选项通常以 - 或 -- 开头，参数是命令操作的对象。这跟 Python 调用函数传参数是一个道理。",
+           code:"# 命令结构: command [options] [arguments]\n\n# 最简单的命令——输出文字\necho \"Hello Shell\"\n\n# 带选项的命令\nls -l          # -l 是选项（长格式显示）\nls -la         # 多个选项可以合并\nls --all       # 用全称也行\n\n# 带参数的命令\nls /home       # /home 是参数（指定目录）\nls -l /home    # 选项 + 参数组合\n\n# 查看命令帮助的三种方式\nman ls         # 完整手册（按 q 退出）\nls --help      # 简短帮助\nwhich ls       # 看命令在哪个路径",
+           tip:"记不住选项很正常，用 man 或 --help 查就行，别死记硬背"},
+          {name:"快捷键——提高效率的关键",
+           explain:"命令行的快捷键能让你的操作速度翻倍。这些是 readline 库提供的，几乎所有终端通用。",
+           code:"# 光标移动\nCtrl + A    # 跳到行首\nCtrl + E    # 跳到行尾\nAlt  + B    # 往左跳一个单词\nAlt  + F    # 往右跳一个单词\n\n# 编辑\nCtrl + U    # 删除光标前所有内容\nCtrl + K    # 删除光标后所有内容\nCtrl + W    # 删除光标前一个单词\nCtrl + Y    # 粘贴刚删除的内容\n\n# 历史\nCtrl + R    # 反向搜索历史命令（超有用！）\n!!          # 重复上一条命令\n!$          # 上一条命令的最后一个参数\n\n# 控制\nCtrl + C    # 中断当前命令\nCtrl + D    # 退出当前 Shell\nCtrl + L    # 清屏（等于 clear）\nTab         # 自动补全（按两下显示所有选项）"}
+        ],
+        exercise:"打开终端，用 echo 输出你的名字；用 man 查看 ls 的手册并找到「按文件大小排序」的选项；用 Ctrl+R 搜索你刚执行过的命令。"
+      },
+      {
+        day:2, title:"文件系统导航", tags:["文件系统","cd","pwd","ls"],
+        topics:[
+          {name:"Linux 目录结构",
+           explain:"Linux 的文件系统像一棵倒过来的树，根目录 / 是起点。和 Windows 不同，这里没有 C: D: 盘的概念，一切都挂在 / 下面。理解目录结构对做 ESP32 固件编译、Python 虚拟环境管理都很有用。",
+           code:"# 重要目录\n/           # 根目录，一切的起点\n/home       # 用户目录（你的文件都在这里）\n/root       # root 用户的 home\n/etc        # 系统配置文件\n/var        # 日志、缓存等动态文件\n/tmp        # 临时文件（重启会清空）\n/usr        # 用户程序（bin、lib、share）\n/opt        # 第三方软件\n/dev        # 设备文件（串口在这里！如 /dev/ttyUSB0）\n/proc       # 进程信息（虚拟文件系统）\n/mnt        # 手动挂载点\n\n# 查看目录树结构\ntree -L 2 /  # 显示两层深度（需安装 tree）",
+           tip:"ESP32 的串口设备文件在 /dev/ttyUSB0 或 /dev/ttyACM0，以后调试时会经常跟 /dev 打交道"},
+          {name:"目录导航命令",
+           explain:"cd、pwd、ls 是你每天用得最多的三个命令，跟呼吸一样自然。",
+           code:"# 当前位置\npwd                    # Print Working Directory\n\n# 切换目录\ncd /home               # 去绝对路径\ncd Documents           # 去相对路径\ncd ..                  # 上一级\ncd ../..               # 上两级\ncd ~                   # 回 home 目录（等于 cd）\ncd -                   # 回上一次的目录（很好用！）\n\n# 列出文件\nls                     # 基本列表\nls -l                  # 长格式（权限、大小、时间）\nls -la                 # 包含隐藏文件（.开头的）\nls -lh                 # 文件大小用人类可读格式\nls -lt                 # 按时间排序（最新在前）\nls -lS                 # 按大小排序\nls -R                  # 递归列出子目录\n\n# 类型感知列表\nls -F                  # 目录加/，可执行加*\nls --color=auto        # 彩色显示（一般默认开启）",
+           tip:"设置别名可以省很多事：alias ll='ls -lah' 加到 ~/.bashrc 里永久生效"}
+        ],
+        exercise:"从 home 目录出发，用 cd 导航到 /etc，用 ls -la 列出文件，然后用 cd - 跳回来；用 ls -lhS 找出 home 目录下最大的 5 个文件。"
+      },
+      {
+        day:3, title:"文件与目录操作", tags:["文件","mkdir","cp","mv","rm"],
+        topics:[
+          {name:"创建与删除",
+           explain:"文件和目录的增删操作是 Shell 的基础中的基础。注意：Shell 里删除没有回收站！rm 删了就真没了。",
+           code:"# 创建目录\nmkdir myproject            # 创建单个\nmkdir -p a/b/c/d           # 递归创建多层\nmkdir -p project/{src,lib,docs,test}  # 一次创建多个子目录\n\n# 创建文件\ntouch newfile.txt          # 创建空文件（或更新时间戳）\ntouch file{1..5}.txt       # 批量创建 file1~file5\n\n# 删除文件\nrm file.txt                # 删除文件\nrm -i file.txt             # 删前确认（安全！）\nrm -f file.txt             # 强制删除不提示\n\n# 删除目录\nrmdir emptydir             # 只能删空目录\nrm -r mydir                # 递归删除目录及内容\nrm -rf mydir               # 强制递归删除（危险！）\n\n# ⚠️ 永远不要执行: rm -rf /",
+           tip:"养成好习惯：删除前先用 ls 确认目标，或者用 rm -i 交互模式"},
+          {name:"复制、移动与重命名",
+           explain:"cp 复制，mv 移动（也用来重命名）。这两个命令的参数逻辑完全一样：源文件在前，目标在后。",
+           code:"# 复制\ncp source.txt dest.txt            # 复制文件\ncp source.txt /path/to/dir/       # 复制到目录\ncp -r srcdir/ destdir/            # 递归复制整个目录\ncp -i source.txt dest.txt         # 覆盖前确认\ncp -u source.txt dest.txt         # 只在源更新时复制\ncp -v source.txt dest.txt         # 显示复制过程\n\n# 移动/重命名\nmv oldname.txt newname.txt        # 重命名\nmv file.txt /path/to/dir/         # 移动文件\nmv -i source dest                 # 覆盖前确认\nmv *.txt textfiles/               # 批量移动\n\n# 实用技巧：备份文件\ncp config.yaml config.yaml.bak    # 修改前备份\ncp config.yaml{,.bak}             # 等效简写",
+           tip:"mv 重命名文件几乎是瞬间完成的（同一分区内只改指针），但 cp 是真的复制数据"}
+        ],
+        exercise:"创建一个项目目录结构：project/{src,config,logs,backup}；在 src 里创建 5 个 .sh 文件；把它们复制到 backup；然后把 logs 里的内容全部删除。"
+      },
+      {
+        day:4, title:"文件内容查看与搜索", tags:["cat","less","grep","head","tail"],
+        topics:[
+          {name:"查看文件内容",
+           explain:"Shell 提供了多种查看文件的方式，适合不同场景。cat 适合短文件，less 适合长文件，head/tail 适合只看开头或结尾。",
+           code:"# cat - 一次性输出全部内容\ncat file.txt                # 显示内容\ncat -n file.txt             # 带行号\ncat file1.txt file2.txt     # 连接多个文件\n\n# less - 分页浏览（推荐看长文件）\nless file.txt\n# 操作：空格=下一页 b=上一页 /搜索 q=退出\n# G=跳到末尾 g=跳到开头 n=下一个搜索结果\n\n# head / tail - 查看开头/结尾\nhead -n 20 file.txt         # 前 20 行\ntail -n 20 file.txt         # 后 20 行\ntail -f logfile.log         # 实时追踪日志（超有用！）\ntail -f -n 50 logfile.log   # 先显示50行再追踪\n\n# wc - 统计\nwc file.txt                 # 行数 词数 字节数\nwc -l file.txt              # 只数行数\nwc -w file.txt              # 只数词数",
+           tip:"tail -f 是看日志的神器，比如监控 ESP32 编译日志或 Home Assistant 日志"},
+          {name:"grep - 文本搜索利器",
+           explain:"grep 可能是 Shell 里你用得最多的搜索工具。它在文件中搜索匹配的文本行，支持正则表达式。名字来自 'Global Regular Expression Print'。",
+           code:"# 基本搜索\ngrep \"error\" logfile.txt          # 搜索包含 error 的行\ngrep -i \"error\" logfile.txt       # 忽略大小写\ngrep -n \"error\" logfile.txt       # 显示行号\ngrep -c \"error\" logfile.txt       # 统计匹配行数\n\n# 反向与精确搜索\ngrep -v \"debug\" logfile.txt       # 排除包含 debug 的行\ngrep -w \"error\" logfile.txt       # 全词匹配\n\n# 递归搜索目录\ngrep -r \"TODO\" ./src/             # 递归搜索 src 目录\ngrep -rn \"import\" --include=\"*.py\" .  # 只在 .py 文件中搜\n\n# 上下文显示\ngrep -A 3 \"error\" log.txt         # After: 显示匹配行后3行\ngrep -B 2 \"error\" log.txt         # Before: 显示匹配行前2行\ngrep -C 2 \"error\" log.txt         # Context: 前后各2行\n\n# 正则表达式\ngrep -E \"error|warning\" log.txt   # 多词搜索\ngrep -E \"^#\" config.conf          # 以 # 开头的行",
+           tip:"在项目里搜代码用 grep -rn 'pattern' --include='*.py' . 比 IDE 搜索更快"}
+        ],
+        exercise:"创建一个模拟日志文件（包含 INFO、WARNING、ERROR 等级别），用 grep 分别筛选出所有 ERROR 行和 WARNING 行，再用 grep -c 统计各有多少条。"
+      },
+      {
+        day:5, title:"文件权限与所有权", tags:["chmod","chown","权限"],
+        topics:[
+          {name:"理解权限标记 rwx",
+           explain:"Linux 的权限系统分三组：文件所有者(u)、所属组(g)、其他人(o)。每组有读(r=4)、写(w=2)、执行(x=1) 三种权限。ls -l 显示的 -rwxr-xr-- 就是权限标记。",
+           code:"# 查看权限\nls -l script.sh\n# -rwxr-xr-- 1 rick staff 1234 Mar 22 script.sh\n# │└┬┘└┬┘└┬┘\n# │ │   │   └─ 其他人：只读(r--)\n# │ │   └──── 组：读+执行(r-x)\n# │ └──────── 所有者：全部(rwx)\n# └────────── 文件类型（- 普通，d 目录，l 链接）\n\n# 权限数字计算\n# r=4  w=2  x=1\n# rwx = 4+2+1 = 7\n# r-x = 4+0+1 = 5\n# r-- = 4+0+0 = 4\n# 所以 rwxr-xr-- = 754",
+           tip:"Shell 脚本必须有执行权限才能运行，这是新手最常遇到的问题"},
+          {name:"修改权限和所有权",
+           explain:"chmod 改权限，chown 改所有者。做硬件项目时经常需要给串口设备文件加权限。",
+           code:"# chmod - 修改权限\nchmod 755 script.sh       # 数字方式\nchmod +x script.sh        # 符号方式：加执行权限\nchmod u+x script.sh       # 只给所有者加执行\nchmod go-w file.txt       # 去掉组和其他的写权限\nchmod -R 755 mydir/       # 递归修改目录\n\n# 常用权限组合\n# 755 = rwxr-xr-x  → 脚本、程序\n# 644 = rw-r--r--  → 普通文件\n# 600 = rw-------  → 私密文件（SSH密钥）\n# 777 = rwxrwxrwx  → 不安全，别用！\n\n# chown - 修改所有者\nchown rick file.txt           # 改所有者\nchown rick:staff file.txt     # 改所有者和组\nchown -R rick:staff mydir/    # 递归修改\n\n# 串口权限（ESP32 开发常用）\nsudo chmod 666 /dev/ttyUSB0\n# 或加入 dialout 组（推荐，永久生效）\nsudo usermod -aG dialout $USER",
+           tip:"ESP32 连接时 Permission denied 多半是串口权限问题，加入 dialout 组后重新登录即可"}
+        ],
+        exercise:"创建一个 Shell 脚本文件，查看它的默认权限，然后用 chmod 给它加上执行权限，最后运行它。"
+      },
+      {
+        day:6, title:"输入输出重定向", tags:["重定向",">",">>","pipe","|"],
+        topics:[
+          {name:"标准流与重定向",
+           explain:"每个程序都有三个标准流：stdin(0 输入)、stdout(1 输出)、stderr(2 错误)。重定向就是改变这些流的方向——从屏幕到文件，或从文件到程序。这是 Shell 最强大的设计之一。",
+           code:"# 输出重定向\necho \"hello\" > file.txt      # 写入（覆盖）\necho \"world\" >> file.txt     # 追加\nls -l > filelist.txt         # 把输出存到文件\n\n# 错误重定向\nls /nonexist 2> error.log    # 错误输出到文件\nls /nonexist 2>/dev/null     # 丢弃错误（静默执行）\n\n# 同时重定向输出和错误\ncommand > output.log 2>&1    # 传统写法\ncommand &> output.log        # Bash 简写\n\n# 输入重定向\nsort < unsorted.txt          # 从文件读入\nwc -l < data.txt             # 统计文件行数\n\n# Here Document（嵌入多行文本）\ncat << EOF\n这是第一行\n这是第二行\n变量也能展开：$HOME\nEOF\n\n# Here String\ngrep \"hello\" <<< \"hello world\"",
+           tip:"/dev/null 是黑洞文件，写入的数据全部丢弃。常用来屏蔽不需要的输出"},
+          {name:"管道 Pipe",
+           explain:"管道 | 是 Shell 哲学的精髓：每个命令做好一件事，通过管道串联成强大的处理链。前一个命令的输出直接成为下一个命令的输入。",
+           code:"# 基本管道\nls -l | less                    # 长列表分页看\nls -l | wc -l                   # 数文件个数\ncat log.txt | grep \"ERROR\"       # 筛选错误\n\n# 多级管道\ncat access.log | grep \"404\" | wc -l\n# 找出日志中所有404错误并计数\n\nps aux | grep python | grep -v grep\n# 找出所有 Python 进程\n\nhistory | grep \"git\" | tail -10\n# 最近10条 git 相关的历史命令\n\n# 实用组合\ncat data.csv | sort | uniq -c | sort -rn | head -10\n# 统计 CSV 中每行出现次数 → 排序 → 取前10\n\nfind . -name \"*.py\" | xargs wc -l | sort -n | tail\n# 统计所有 .py 文件行数并排序\n\n# tee - 管道分流（同时输出到屏幕和文件）\nls -l | tee filelist.txt\ncommand | tee output.log | grep \"error\"",
+           tip:"管道是 Shell 的灵魂。Python 里你会链式调用方法，Shell 里你用管道链接命令，思路是一样的"}
+        ],
+        exercise:"用管道组合命令：(1) 列出当前目录所有文件并按大小倒序排列取前5；(2) 统计某目录下所有 .txt 文件的总行数；(3) 查找历史命令中所有包含 ssh 的记录。"
+      },
+      {
+        day:7, title:"文本处理三剑客预览 + 阶段复习", tags:["sed","awk","cut","sort","uniq"],
+        topics:[
+          {name:"cut / sort / uniq — 基础文本工具",
+           explain:"这三个命令组合在一起可以做大部分数据提取和统计工作。cut 切列，sort 排序，uniq 去重/计数。",
+           code:"# cut - 按列切割\ncut -d',' -f1,3 data.csv       # 逗号分隔，取第1和第3列\ncut -d':' -f1 /etc/passwd      # 冒号分隔，取用户名\ncut -c1-10 file.txt            # 取每行前10个字符\n\n# sort - 排序\nsort file.txt                  # 字母排序\nsort -n numbers.txt            # 数字排序\nsort -r file.txt               # 逆序\nsort -t',' -k2 -n data.csv     # 按第2列数字排序\nsort -u file.txt               # 排序并去重\n\n# uniq - 去重（必须先 sort！）\nsort names.txt | uniq           # 去重\nsort names.txt | uniq -c        # 统计每个出现次数\nsort names.txt | uniq -d        # 只显示重复的\nsort names.txt | uniq -c | sort -rn  # 按频率排序\n\n# tr - 字符转换\necho \"Hello\" | tr 'a-z' 'A-Z'   # 转大写\necho \"a:b:c\" | tr ':' '\\n'     # 冒号换成换行\ncat file.txt | tr -d '\\r'      # 删除Windows换行符\ncat file.txt | tr -s ' '       # 压缩连续空格",
+           tip:"处理 CSV/日志数据时，cut + sort + uniq 的组合几乎无敌"},
+          {name:"第一周复习：综合练习",
+           explain:"把这一周学的命令串起来做一个实际任务：分析一个系统日志或数据文件。",
+           code:"# 综合实战：分析 /etc/passwd\n# 1. 查看前5个用户\nhead -5 /etc/passwd\n\n# 2. 提取所有用户名\ncut -d':' -f1 /etc/passwd\n\n# 3. 统计总用户数\ncut -d':' -f1 /etc/passwd | wc -l\n\n# 4. 查看使用 bash 的用户\ngrep '/bash$' /etc/passwd | cut -d':' -f1\n\n# 5. 按 UID 排序\nsort -t':' -k3 -n /etc/passwd\n\n# 6. 找出 home 目录在 /home 下的用户\ngrep '/home/' /etc/passwd | cut -d':' -f1,6\n\n# 综合实战：分析目录\nfind . -type f -name \"*.sh\" | wc -l     # 数脚本\nfind . -type f -printf '%s %p\\n' | sort -rn | head -5  # 最大的5个文件\ndu -sh */ | sort -rh | head              # 最大的子目录"}
+        ],
+        exercise:"分析 /etc/passwd 文件：提取所有用户名并排序；统计使用各种 Shell 的用户数量；找出 UID 大于 1000 的普通用户。"
+      },
+      {
+        day:8, title:"你的第一个 Shell 脚本", tags:["脚本","shebang","变量","echo"],
+        topics:[
+          {name:"脚本结构与执行",
+           explain:"Shell 脚本就是把多条命令写在一个文件里，按顺序执行。第一行的 shebang（#!）告诉系统用哪个解释器。跟 Python 脚本的 #!/usr/bin/env python3 是同一个道理。",
+           code:"#!/bin/bash\n# 这是你的第一个 Shell 脚本\n# 文件名: hello.sh\n\n# 打印欢迎信息\necho \"==========================\"\necho \"  Shell 学习之旅开始了！\"\necho \"==========================\"\necho \"\"\necho \"当前用户: $(whoami)\"\necho \"当前时间: $(date '+%Y-%m-%d %H:%M:%S')\"\necho \"当前目录: $(pwd)\"\necho \"系统信息: $(uname -s) $(uname -m)\"\n\n# 执行方式：\n# 方式1: chmod +x hello.sh && ./hello.sh\n# 方式2: bash hello.sh\n# 方式3: source hello.sh（在当前 Shell 执行）",
+           tip:"用 #!/usr/bin/env bash 比 #!/bin/bash 更通用，因为 bash 可能不在 /bin 下"},
+          {name:"变量",
+           explain:"Shell 变量不需要声明类型（跟 Python 类似），但赋值时等号两边不能有空格！这是新手最容易犯的错。",
+           code:"#!/bin/bash\n\n# 变量赋值（=两边不能有空格！）\nname=\"Rick\"\nage=27\nproject=\"漫剧流水线\"\n\n# 使用变量\necho \"名字: $name\"\necho \"年龄: ${age}岁\"      # 花括号更安全\necho \"${name}的项目: ${project}\"\n\n# 命令替换（把命令输出赋给变量）\ncurrent_dir=$(pwd)\nfile_count=$(ls | wc -l)\ntoday=$(date +%Y%m%d)\necho \"今天是 $today，当前目录有 $file_count 个文件\"\n\n# 只读变量\nreadonly PI=3.14159\n# PI=3  # 会报错\n\n# 环境变量 vs 局部变量\nexport MY_VAR=\"全局可见\"    # 子进程可见\nlocal_var=\"只在当前Shell\"   # 子进程不可见\n\n# 特殊变量\necho \"脚本名: $0\"\necho \"第一个参数: $1\"\necho \"所有参数: $@\"\necho \"参数个数: $#\"\necho \"上一条命令退出码: $?\"\necho \"当前进程PID: $$\"",
+           tip:"Python 里 name = 'Rick' 有空格没关系，但 Shell 里 name = 'Rick' 会报错！等号两边绝对不能有空格"}
+        ],
+        exercise:"写一个脚本 sysinfo.sh：显示当前用户、主机名、系统版本、CPU 信息、内存使用、磁盘使用，并把结果同时输出到屏幕和保存到 sysinfo_日期.txt。"
+      },
+      {
+        day:9, title:"字符串与数组操作", tags:["字符串","数组","参数展开"],
+        topics:[
+          {name:"字符串操作",
+           explain:"Bash 的字符串操作通过参数展开实现，虽然没有 Python 的字符串方法那么多，但基本操作都能做到。",
+           code:"#!/bin/bash\nstr=\"Hello Shell World\"\n\n# 长度\necho ${#str}              # 17\n\n# 截取（从0开始）\necho ${str:6}             # Shell World\necho ${str:6:5}           # Shell\n\n# 替换\necho ${str/Shell/Bash}    # Hello Bash World（替换第一个）\necho ${str//l/L}          # HeLLo SheLL WorLd（替换全部）\n\n# 删除匹配\nfilename=\"project.tar.gz\"\necho ${filename%.gz}      # project.tar   (删除最短后缀)\necho ${filename%%.*}      # project       (删除最长后缀)\necho ${filename#*.}       # tar.gz        (删除最短前缀)\necho ${filename##*.}      # gz            (删除最长前缀)\n\n# 默认值\necho ${undefined_var:-\"默认值\"}    # 变量空时用默认值\necho ${undefined_var:=\"设置默认\"}  # 变量空时赋默认值\n\n# 大小写转换（Bash 4+）\necho ${str^^}             # HELLO SHELL WORLD\necho ${str,,}             # hello shell world",
+           tip:"${filename##*.} 取文件扩展名、${filename%.*} 去扩展名——这两个在批处理文件时超常用"},
+          {name:"数组",
+           explain:"Bash 支持一维数组（索引和关联两种）。虽然比不上 Python 的列表灵活，但处理批量数据够用了。",
+           code:"#!/bin/bash\n\n# 索引数组\nfruits=(\"apple\" \"banana\" \"cherry\" \"date\")\necho ${fruits[0]}           # apple\necho ${fruits[2]}           # cherry\necho ${fruits[@]}           # 所有元素\necho ${#fruits[@]}          # 元素个数: 4\n\n# 添加/修改\nfruits+=(\"elderberry\")      # 追加\nfruits[1]=\"blueberry\"       # 修改\n\n# 切片\necho ${fruits[@]:1:3}       # 从索引1取3个\n\n# 遍历\nfor f in \"${fruits[@]}\"; do\n    echo \"水果: $f\"\ndone\n\n# 关联数组（Bash 4+，类似 Python 字典）\ndeclare -A config\nconfig[host]=\"192.168.1.100\"\nconfig[port]=\"8080\"\nconfig[user]=\"admin\"\n\necho \"服务器: ${config[host]}:${config[port]}\"\n\n# 遍历关联数组\nfor key in \"${!config[@]}\"; do\n    echo \"$key = ${config[$key]}\"\ndone"}
+        ],
+        exercise:"写一个脚本：接收一个文件路径参数，提取文件名、扩展名、目录路径并分别显示；用数组存储一周的任务列表，然后遍历输出。"
+      },
+      {
+        day:10, title:"条件判断", tags:["if","test","条件","比较"],
+        topics:[
+          {name:"if 语句与 test 命令",
+           explain:"Shell 的 if 语句用 test 命令（或 [ ] 简写）来做条件判断。注意 [ ] 内部两端必须有空格！这是 Shell 和 Python 最大的语法差异之一。",
+           code:"#!/bin/bash\n\n# 基本 if 结构\nif [ $age -gt 18 ]; then\n    echo \"成年人\"\nelif [ $age -gt 12 ]; then\n    echo \"青少年\"\nelse\n    echo \"儿童\"\nfi\n\n# 数字比较\n# -eq 等于  -ne 不等于\n# -gt 大于  -ge 大于等于\n# -lt 小于  -le 小于等于\n\n# 字符串比较\nname=\"Rick\"\nif [ \"$name\" = \"Rick\" ]; then\n    echo \"Hello Rick\"\nfi\nif [ -z \"$var\" ]; then echo \"变量为空\"; fi\nif [ -n \"$var\" ]; then echo \"变量非空\"; fi\n\n# 文件测试\nif [ -f \"config.yaml\" ]; then echo \"文件存在\"; fi\nif [ -d \"/home/rick\" ]; then echo \"目录存在\"; fi\nif [ -r \"file.txt\" ]; then echo \"可读\"; fi\nif [ -w \"file.txt\" ]; then echo \"可写\"; fi\nif [ -x \"script.sh\" ]; then echo \"可执行\"; fi\nif [ -s \"file.txt\" ]; then echo \"文件非空\"; fi\n\n# [[ ]] - 增强版（推荐用这个）\nif [[ $name == R* ]]; then echo \"名字以R开头\"; fi\nif [[ $age -gt 18 && $name == \"Rick\" ]]; then\n    echo \"匹配\"\nfi",
+           tip:"永远记得变量加双引号 \"$var\"，否则变量为空时 [ = \"Rick\" ] 会语法错误"},
+          {name:"case 语句",
+           explain:"case 类似 Python 3.10 的 match/case 或 C 的 switch，适合多分支选择。",
+           code:"#!/bin/bash\n\necho -n \"选择操作 (start/stop/restart/status): \"\nread action\n\ncase $action in\n    start)\n        echo \"启动服务...\"\n        ;;\n    stop)\n        echo \"停止服务...\"\n        ;;\n    restart)\n        echo \"重启服务...\"\n        ;;\n    status)\n        echo \"查看状态...\"\n        ;;\n    *)\n        echo \"未知操作: $action\"\n        echo \"用法: start|stop|restart|status\"\n        exit 1\n        ;;\nesac\n\n# 更复杂的模式匹配\ncase $filename in\n    *.tar.gz|*.tgz)  echo \"Gzip 压缩包\" ;;\n    *.zip)           echo \"Zip 压缩包\" ;;\n    *.py)            echo \"Python 文件\" ;;\n    *.sh)            echo \"Shell 脚本\" ;;\n    *)               echo \"其他文件\" ;;\nesac"}
+        ],
+        exercise:"写一个脚本 filecheck.sh：接收一个路径参数，判断它是文件还是目录，是否存在，如果是文件显示大小和权限，如果是目录显示包含多少文件。"
+      },
+      {
+        day:11, title:"循环", tags:["for","while","until","循环"],
+        topics:[
+          {name:"for 循环",
+           explain:"Shell 的 for 循环有多种写法，最常用的是遍历列表和 C 风格两种。",
+           code:"#!/bin/bash\n\n# 遍历列表\nfor name in Alice Bob Charlie; do\n    echo \"Hello $name\"\ndone\n\n# 遍历数组\nfiles=(\"a.txt\" \"b.txt\" \"c.txt\")\nfor f in \"${files[@]}\"; do\n    echo \"处理: $f\"\ndone\n\n# 遍历命令输出\nfor f in $(ls *.sh 2>/dev/null); do\n    echo \"脚本: $f\"\ndone\n\n# 遍历数字范围\nfor i in {1..10}; do\n    echo \"第 $i 次\"\ndone\nfor i in {0..100..5}; do      # 步长5\n    echo $i\ndone\n\n# C 风格 for 循环\nfor ((i=0; i<10; i++)); do\n    echo \"Index: $i\"\ndone\n\n# 遍历文件（最安全的方式）\nfor f in /path/to/dir/*; do\n    [ -f \"$f\" ] && echo \"文件: $f\"\ndone",
+           tip:"遍历文件名时不要用 for f in $(ls *)，有空格的文件名会出问题。直接用 for f in * 或 for f in /path/*"},
+          {name:"while / until 循环",
+           explain:"while 在条件为真时循环，until 在条件为假时循环。while read 是逐行处理文件的标准模式。",
+           code:"#!/bin/bash\n\n# while 循环\ncount=1\nwhile [ $count -le 5 ]; do\n    echo \"Count: $count\"\n    ((count++))\ndone\n\n# until 循环（条件为假时执行）\nuntil [ -f \"ready.flag\" ]; do\n    echo \"等待 ready.flag 出现...\"\n    sleep 2\ndone\necho \"文件已就绪！\"\n\n# while read - 逐行读取文件（最常用！）\nwhile IFS= read -r line; do\n    echo \"行内容: $line\"\ndone < input.txt\n\n# 管道 + while read\ncat /etc/passwd | while read line; do\n    username=$(echo $line | cut -d: -f1)\n    echo \"用户: $username\"\ndone\n\n# 无限循环（监控脚本常用）\nwhile true; do\n    echo \"$(date): 检查服务状态...\"\n    # 这里放检查逻辑\n    sleep 60\ndone\n\n# break 和 continue\nfor i in {1..10}; do\n    [ $i -eq 3 ] && continue   # 跳过3\n    [ $i -eq 8 ] && break      # 到8停止\n    echo $i\ndone"}
+        ],
+        exercise:"写一个脚本：(1) 用 for 循环批量创建 day01.txt 到 day30.txt；(2) 用 while read 逐行读取一个配置文件，忽略 # 开头的注释行和空行，输出有效配置。"
+      },
+      {
+        day:12, title:"函数", tags:["function","return","局部变量"],
+        topics:[
+          {name:"定义与调用函数",
+           explain:"Shell 函数可以把重复的逻辑封装起来。和 Python 不同的是，Shell 函数的参数不写在括号里，而是通过 $1 $2 来接收。",
+           code:"#!/bin/bash\n\n# 两种定义方式\nfunction greet() {\n    echo \"Hello, $1!\"\n}\n# 或省略 function 关键字\ngreet2() {\n    echo \"Hi, $1! 你今年 $2 岁\"\n}\n\n# 调用（参数用空格分隔，不用括号）\ngreet \"Rick\"\ngreet2 \"Rick\" 27\n\n# 带返回值的函数\nis_file_exists() {\n    if [ -f \"$1\" ]; then\n        return 0    # 0 = true/成功\n    else\n        return 1    # 非0 = false/失败\n    fi\n}\n\nif is_file_exists \"config.yaml\"; then\n    echo \"文件存在\"\nfi\n\n# 用 echo 返回结果（更灵活）\nget_extension() {\n    local filename=\"$1\"\n    echo \"${filename##*.}\"\n}\next=$(get_extension \"photo.jpg\")\necho \"扩展名: $ext\"\n\n# local 局部变量\ncalculate() {\n    local result=$(( $1 + $2 ))\n    echo $result\n}\nsum=$(calculate 10 20)\necho \"和: $sum\"",
+           tip:"Shell 函数的 return 只能返回 0-255 的数字（退出码），要返回字符串得用 echo + 命令替换"},
+          {name:"实用函数模式",
+           explain:"一些在脚本里经常用到的函数模式。",
+           code:"#!/bin/bash\n\n# 日志函数（带颜色）\nlog_info()  { echo -e \"\\033[32m[INFO]\\033[0m  $(date '+%H:%M:%S') $*\"; }\nlog_warn()  { echo -e \"\\033[33m[WARN]\\033[0m  $(date '+%H:%M:%S') $*\"; }\nlog_error() { echo -e \"\\033[31m[ERROR]\\033[0m $(date '+%H:%M:%S') $*\" >&2; }\n\nlog_info \"开始处理...\"\nlog_warn \"磁盘空间不足\"\nlog_error \"连接失败！\"\n\n# 确认函数\nconfirm() {\n    local msg=\"${1:-确定继续？}\"\n    read -p \"$msg [y/N] \" answer\n    [[ \"$answer\" =~ ^[Yy] ]]\n}\n\nif confirm \"确定要删除所有日志？\"; then\n    rm -f *.log\n    log_info \"日志已清除\"\nfi\n\n# 重试函数\nretry() {\n    local max_attempts=$1\n    shift\n    local attempt=1\n    until \"$@\"; do\n        if [ $attempt -ge $max_attempts ]; then\n            log_error \"$* 失败，已重试 $max_attempts 次\"\n            return 1\n        fi\n        log_warn \"重试第 $attempt 次...\"\n        ((attempt++))\n        sleep 2\n    done\n}\n\nretry 3 ping -c1 google.com"}
+        ],
+        exercise:"写一个工具库脚本 utils.sh，包含：日志函数（info/warn/error）、文件备份函数、确认提示函数。然后在另一个脚本里用 source utils.sh 导入并使用。"
+      },
+      {
+        day:13, title:"用户输入与参数处理", tags:["read","getopts","参数"],
+        topics:[
+          {name:"read 命令",
+           explain:"read 命令从用户那里获取输入，类似 Python 的 input()。",
+           code:"#!/bin/bash\n\n# 基本输入\nread -p \"请输入你的名字: \" name\necho \"你好, $name!\"\n\n# 带超时\nread -t 10 -p \"10秒内输入密码: \" password\n\n# 隐藏输入（密码场景）\nread -s -p \"密码: \" password\necho \"\"  # read -s 不会换行\n\n# 限制字符数\nread -n 1 -p \"继续? (y/n) \" choice\necho \"\"\n\n# 带默认值\nread -p \"端口 [8080]: \" port\nport=${port:-8080}\necho \"使用端口: $port\"\n\n# 读取多个值\nread -p \"输入姓 名: \" first last\necho \"$last$first\"\n\n# 从管道读取\necho \"hello world\" | read a b\n# 注意：管道中的 read 在子Shell中，变量在外面不可见\n# 解决方案：\nread a b <<< \"hello world\"\necho \"$a $b\"",
+           tip:"read -p 的提示文字后面最好加个空格，让用户输入位置更清晰"},
+          {name:"getopts 参数解析",
+           explain:"getopts 用来解析脚本的命令行选项，就像你运行 ls -l -a 时的 -l 和 -a。写专业的脚本工具必须掌握。",
+           code:"#!/bin/bash\n# 脚本: deploy.sh\n# 用法: deploy.sh -e prod -p 8080 -v\n\nENV=\"dev\"\nPORT=3000\nVERBOSE=false\n\nusage() {\n    echo \"Usage: $0 [-e env] [-p port] [-v] [-h]\"\n    echo \"  -e  环境 (dev|staging|prod)\"\n    echo \"  -p  端口号\"\n    echo \"  -v  详细输出\"\n    echo \"  -h  帮助\"\n    exit 1\n}\n\nwhile getopts \":e:p:vh\" opt; do\n    case $opt in\n        e) ENV=\"$OPTARG\" ;;\n        p) PORT=\"$OPTARG\" ;;\n        v) VERBOSE=true ;;\n        h) usage ;;\n        \\?) echo \"无效选项: -$OPTARG\"; usage ;;\n        :)  echo \"选项 -$OPTARG 需要参数\"; usage ;;\n    esac\ndone\n\necho \"部署配置:\"\necho \"  环境: $ENV\"\necho \"  端口: $PORT\"\necho \"  详细: $VERBOSE\"\n\n# 更高级的方式：位置参数\nshift $((OPTIND - 1))  # 移除已处理的选项\necho \"剩余参数: $@\""}
+        ],
+        exercise:"写一个脚本 backup.sh：用 getopts 支持 -s 源目录 -d 目标目录 -c 压缩方式(tar/zip) -v 详细模式 -h 帮助，实现一个完整的备份工具。"
+      },
+      {
+        day:14, title:"实战项目：系统监控脚本", tags:["项目","监控","报告"],
+        topics:[
+          {name:"综合实战：系统健康检查器",
+           explain:"用前两周学到的所有知识，写一个完整的系统监控脚本。这个项目会用到：变量、函数、条件判断、循环、文件操作、管道、重定向、参数处理。",
+           code:"#!/bin/bash\n# system_health.sh - 系统健康检查器\n\nRED='\\033[31m'\nGREEN='\\033[32m'\nYELLOW='\\033[33m'\nNC='\\033[0m'\nLOG_FILE=\"health_$(date +%Y%m%d_%H%M%S).log\"\nTHRESHOLD_CPU=80\nTHRESHOLD_MEM=80\nTHRESHOLD_DISK=90\n\nlog() { echo -e \"$1\" | tee -a \"$LOG_FILE\"; }\n\ncheck_cpu() {\n    local usage=$(top -bn1 | grep 'Cpu(s)' | awk '{print int($2)}')\n    if [ $usage -gt $THRESHOLD_CPU ]; then\n        log \"${RED}[ALERT]${NC} CPU: ${usage}%\"\n    else\n        log \"${GREEN}[OK]${NC}    CPU: ${usage}%\"\n    fi\n}\n\ncheck_memory() {\n    local total=$(free -m | awk '/Mem:/{print $2}')\n    local used=$(free -m | awk '/Mem:/{print $3}')\n    local pct=$((used * 100 / total))\n    if [ $pct -gt $THRESHOLD_MEM ]; then\n        log \"${RED}[ALERT]${NC} 内存: ${used}MB/${total}MB (${pct}%)\"\n    else\n        log \"${GREEN}[OK]${NC}    内存: ${used}MB/${total}MB (${pct}%)\"\n    fi\n}\n\ncheck_disk() {\n    while read -r line; do\n        local pct=$(echo $line | awk '{print int($5)}')\n        local mount=$(echo $line | awk '{print $6}')\n        if [ $pct -gt $THRESHOLD_DISK ]; then\n            log \"${RED}[ALERT]${NC} 磁盘 $mount: ${pct}%\"\n        else\n            log \"${GREEN}[OK]${NC}    磁盘 $mount: ${pct}%\"\n        fi\n    done <<< $(df -h | grep '^/dev')\n}\n\nlog \"\\n====== 系统健康检查 $(date) ======\"\ncheck_cpu\ncheck_memory\ncheck_disk\nlog \"\\n报告已保存到: $LOG_FILE\"",
+           tip:"这个脚本可以加到 crontab 里定时执行，实现自动化监控"}
+        ],
+        exercise:"完善这个监控脚本：加入网络连通性检查（ping）、检查特定服务是否运行（如 Home Assistant）、当出现 ALERT 时发送通知（可以写入文件或调用 API）。"
+      },
+      {
+        day:15, title:"sed 流编辑器", tags:["sed","文本替换","正则"],
+        topics:[
+          {name:"sed 基础操作",
+           explain:"sed（Stream Editor）是行级文本处理工具，最擅长的是查找替换。一行命令就能完成 Python 好几行才能做到的文本批量修改。",
+           code:"# 替换（s 命令）\nsed 's/old/new/' file.txt          # 每行替换第一个\nsed 's/old/new/g' file.txt         # 全局替换\nsed 's/old/new/gi' file.txt        # 全局+忽略大小写\n\n# 直接修改文件\nsed -i 's/old/new/g' file.txt       # Linux\nsed -i '' 's/old/new/g' file.txt    # macOS\n\n# 指定行操作\nsed '3s/old/new/' file.txt          # 只在第3行替换\nsed '2,5s/old/new/g' file.txt       # 第2到5行\nsed '/pattern/s/old/new/g' file.txt # 匹配行才替换\n\n# 删除行\nsed '5d' file.txt                   # 删第5行\nsed '/^#/d' file.txt                # 删注释行\nsed '/^$/d' file.txt                # 删空行\nsed '/debug/d' log.txt              # 删含 debug 的行\n\n# 插入/追加\nsed '3i\\新的第三行' file.txt         # 在第3行前插入\nsed '3a\\第三行后面' file.txt         # 在第3行后追加\nsed '1i\\#!/bin/bash' script.sh       # 在开头插入shebang\n\n# 打印\nsed -n '5,10p' file.txt             # 只打印5-10行\nsed -n '/error/p' log.txt           # 只打印匹配行",
+           tip:"sed -i 前最好先不带 -i 预览效果，确认无误再加 -i 修改原文件"},
+          {name:"sed 高级用法",
+           explain:"sed 配合正则表达式可以做复杂的文本变换。",
+           code:"# 正则捕获与反向引用\n# 交换 first last → last, first\necho \"Rick Chen\" | sed 's/\\(.*\\) \\(.*\\)/\\2, \\1/'\n# 输出: Chen, Rick\n\n# 提取版本号\necho \"version: 2.3.1\" | sed 's/.*: //'\n# 输出: 2.3.1\n\n# 多条命令\nsed -e 's/foo/bar/g' -e 's/baz/qux/g' file.txt\n# 或用分号\nsed 's/foo/bar/g; s/baz/qux/g' file.txt\n\n# 实战：修改配置文件\n# 把 port=3000 改成 port=8080\nsed -i 's/^port=.*/port=8080/' config.ini\n\n# 在 [server] 段后插入一行\nsed -i '/^\\[server\\]/a\\host=0.0.0.0' config.ini\n\n# 批量修改项目里的 import\nfind . -name '*.py' -exec sed -i 's/from old_module/from new_module/g' {} +\n\n# 清理日志：删除时间戳，只保留消息\nsed 's/^[0-9-]* [0-9:]* //' app.log"}
+        ],
+        exercise:"用 sed 实现：(1) 把一个 CSV 文件的逗号分隔改成 Tab 分隔；(2) 删除代码文件中的所有注释行和空行；(3) 批量将项目中所有 .py 文件的 print( 替换为 logging.info(。"
+      },
+      {
+        day:16, title:"awk 编程", tags:["awk","数据处理","列操作"],
+        topics:[
+          {name:"awk 基础",
+           explain:"awk 是按列处理文本的利器。如果说 sed 擅长行操作，awk 就擅长列操作。每行自动被分成 $1 $2 $3... 各列，$0 是整行。类似 Python 的 split() 然后取元素。",
+           code:"# 基本用法\nawk '{print $1}' file.txt             # 打印第1列\nawk '{print $1, $3}' file.txt         # 打印第1和第3列\nawk '{print NR\": \"$0}' file.txt       # 带行号打印\n\n# 指定分隔符\nawk -F',' '{print $2}' data.csv       # CSV 文件取第2列\nawk -F':' '{print $1}' /etc/passwd    # 取用户名\n\n# 条件过滤\nawk '$3 > 100' data.txt               # 第3列大于100的行\nawk '/error/' log.txt                 # 包含 error 的行\nawk '$1 == \"Rick\"' users.txt          # 第1列等于 Rick\nawk 'NR >= 5 && NR <= 10' file.txt    # 第5到10行\n\n# 格式化输出\nawk '{printf \"%-20s %10d\\n\", $1, $2}' data.txt\n\n# 内置变量\n# NR = 当前行号\n# NF = 当前行的列数\n# FS = 字段分隔符\n# OFS = 输出分隔符\n# FILENAME = 文件名\n\nawk '{print NR, NF, $NF}' file.txt  # 行号、列数、最后一列",
+           tip:"记住：awk 里 $1 是第一列，Shell 里 $1 是第一个参数，别搞混了"},
+          {name:"awk 计算与统计",
+           explain:"awk 内置了算术运算和统计能力，处理数据文件时特别方便。",
+           code:"# 求和\nawk '{sum += $2} END {print \"总计:\", sum}' sales.txt\n\n# 平均值\nawk '{sum += $2; n++} END {print \"平均:\", sum/n}' data.txt\n\n# 最大最小值\nawk 'BEGIN {max=0} $2>max {max=$2; line=$0} END {print max, line}' data.txt\n\n# 分组统计\nawk -F',' '{count[$1]++} END {for(k in count) print k, count[k]}' data.csv\n\n# 实战：分析 access log\n# 统计每个 IP 的访问次数\nawk '{count[$1]++} END {for(ip in count) print count[ip], ip}' access.log | sort -rn | head -10\n\n# 统计 HTTP 状态码分布\nawk '{count[$9]++} END {for(c in count) print c, count[c]}' access.log\n\n# 计算总流量\nawk '{sum+=$10} END {printf \"总流量: %.2f MB\\n\", sum/1024/1024}' access.log\n\n# BEGIN 和 END 块\nawk 'BEGIN {\n    FS=\",\"; OFS=\"\\t\"\n    print \"姓名\\t分数\\t等级\"\n}\n{\n    grade = ($2 >= 90) ? \"A\" : ($2 >= 80) ? \"B\" : \"C\"\n    print $1, $2, grade\n}\nEND {\n    print \"---\"\n    print \"共处理\", NR, \"条记录\"\n}' scores.csv"}
+        ],
+        exercise:"创建一个模拟的销售数据 CSV（产品,数量,单价），用 awk 实现：计算每行的金额、按产品分组汇总、计算总销售额、找出销量最高的产品。"
+      },
+      {
+        day:17, title:"find 与 xargs", tags:["find","xargs","文件搜索"],
+        topics:[
+          {name:"find 文件搜索",
+           explain:"find 是最强大的文件搜索工具，可以按名称、类型、大小、时间、权限等各种条件查找文件。",
+           code:"# 按名称查找\nfind . -name \"*.py\"                # 当前目录下所有 .py\nfind / -name \"config.yaml\" 2>/dev/null  # 全盘搜索\nfind . -iname \"*.jpg\"              # 忽略大小写\n\n# 按类型\nfind . -type f                     # 只找文件\nfind . -type d                     # 只找目录\nfind . -type l                     # 只找链接\n\n# 按大小\nfind . -size +100M                 # 大于 100MB\nfind . -size -1k                   # 小于 1KB\nfind . -empty                      # 空文件/目录\n\n# 按时间\nfind . -mtime -7                   # 7天内修改过\nfind . -mtime +30                  # 30天前修改的\nfind . -newer ref.txt              # 比 ref.txt 新\n\n# 按权限\nfind . -perm 755                   # 权限是 755\nfind . -perm -u+x                  # 用户可执行\n\n# 组合条件\nfind . -name \"*.log\" -size +10M -mtime +7\nfind . \\( -name \"*.py\" -o -name \"*.sh\" \\)\nfind . -name \"*.tmp\" -not -path \"*/node_modules/*\"\n\n# 执行操作\nfind . -name \"*.pyc\" -delete        # 删除找到的文件\nfind . -name \"*.sh\" -exec chmod +x {} \\;\nfind . -type f -exec grep -l \"TODO\" {} \\;",
+           tip:"find 默认递归搜索所有子目录，加 -maxdepth 1 只搜当前层级"},
+          {name:"xargs 参数传递",
+           explain:"xargs 把前一个命令的输出转换成后一个命令的参数。find + xargs 是 Shell 里最强的文件批处理组合。",
+           code:"# 基本用法\nfind . -name \"*.txt\" | xargs wc -l      # 统计所有txt的行数\nfind . -name \"*.log\" | xargs rm          # 删除所有log\n\n# 处理含空格的文件名\nfind . -name \"*.txt\" -print0 | xargs -0 wc -l\n\n# 限制每次处理的参数数\nfind . -name \"*.jpg\" | xargs -n 5 echo   # 每次传5个\n\n# 占位符\nfind . -name \"*.bak\" | xargs -I{} mv {} /backup/\n\n# 并行执行\nfind . -name \"*.png\" | xargs -P 4 -I{} convert {} -resize 50% {}\n\n# 确认执行\nfind . -name \"*.tmp\" | xargs -p rm  # 每次删除前确认\n\n# 实战组合\n# 在所有 Python 文件中搜索 TODO\nfind . -name \"*.py\" | xargs grep -n \"TODO\"\n\n# 备份所有配置文件\nfind /etc -name \"*.conf\" | xargs -I{} cp {} /backup/\n\n# 统计项目代码行数\nfind . -name \"*.py\" -o -name \"*.sh\" | xargs wc -l | tail -1"}
+        ],
+        exercise:"在你的项目目录里：(1) 找出所有超过 1MB 的文件；(2) 找出 7 天内修改过的 .py 文件；(3) 用 find+xargs 统计所有 Shell 脚本的总行数。"
+      },
+      {
+        day:18, title:"进程管理", tags:["进程","ps","kill","后台任务","jobs"],
+        topics:[
+          {name:"查看与管理进程",
+           explain:"在 Linux 里一切都是进程。理解进程管理对于跑 Home Assistant、Python 脚本、编译 ESP32 固件时排查问题很重要。",
+           code:"# 查看进程\nps aux                            # 所有进程详情\nps aux | grep python              # 找 Python 进程\nps -ef --forest                   # 树形显示\n\n# top / htop\ntop                               # 实时监控\ntop -o %MEM                       # 按内存排序\n# htop 更好用（需安装）\n\n# kill 进程\nkill PID                          # 发 SIGTERM（优雅终止）\nkill -9 PID                       # 发 SIGKILL（强制杀死）\nkill -l                           # 列出所有信号\n\n# 按名字杀进程\npkill python                      # 杀所有 python 进程\npkill -f \"python app.py\"          # 按完整命令匹配\nkillall nginx                     # 杀所有 nginx\n\n# 查找占用端口的进程\nlsof -i :8080                     # 谁在用 8080 端口\nnetstat -tlnp | grep 8080         # 同上\nfuser 8080/tcp                    # 同上\n\n# 进程优先级\nnice -n 10 ./heavy_task.sh        # 低优先级运行\nrenice 5 -p PID                   # 修改运行中进程优先级",
+           tip:"kill -9 是最后手段，先试 kill PID（SIGTERM），让进程有机会清理资源"},
+          {name:"后台任务与作业控制",
+           explain:"把耗时任务放到后台运行，让终端可以继续做别的事。nohup 确保关闭终端后任务继续跑。",
+           code:"# 后台运行\n./long_task.sh &                  # & 放到后台\n\n# 前后台切换\njobs                              # 查看后台任务\nfg %1                             # 把任务1调到前台\nbg %1                             # 让暂停的任务在后台继续\nCtrl + Z                          # 暂停当前任务\n\n# nohup - 终端关了也继续跑\nnohup ./server.sh &\nnohup python3 train.py > train.log 2>&1 &\n\n# disown - 把已有后台任务脱离终端\n./long_task.sh &\ndisown %1\n\n# 等待后台任务\nwait                              # 等所有后台任务完成\nwait $PID                         # 等特定进程完成\n\n# 并行执行多个任务\nfor i in {1..5}; do\n    process_file \"file_$i\" &\ndone\nwait\necho \"全部完成！\"\n\n# screen / tmux（更推荐）\ntmux new -s mywork               # 新建会话\ntmux attach -t mywork             # 重新连接\ntmux ls                           # 列出会话\n# Ctrl+B D 断开（不终止）"}
+        ],
+        exercise:"写一个脚本：启动 3 个后台任务（模拟 sleep），显示它们的 PID，等待全部完成后输出总耗时。"
+      },
+      {
+        day:19, title:"正则表达式", tags:["正则","regex","grep","sed","awk"],
+        topics:[
+          {name:"正则表达式语法",
+           explain:"正则表达式是文本处理的核心工具，grep、sed、awk 都用到它。Shell 里用的基本正则(BRE)和扩展正则(ERE)跟 Python 的 re 模块语法几乎一样。",
+           code:"# 基本元字符\n.        # 匹配任意单个字符\n*        # 前一个字符出现0次或多次\n^        # 行首\n$        # 行尾\n[ ]      # 字符集 [abc] [0-9] [a-zA-Z]\n[^ ]     # 取反 [^0-9] 非数字\n\\        # 转义\n\n# 扩展正则（ERE：grep -E / egrep）\n+        # 1次或多次\n?        # 0次或1次\n|        # 或\n( )      # 分组\n{n,m}    # 重复n到m次\n\n# 实战示例\ngrep -E '^[0-9]+$' file.txt          # 纯数字行\ngrep -E '^[A-Z]' file.txt            # 大写字母开头\ngrep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' file.txt  # 邮箱\ngrep -E '^[0-9]{1,3}(\\.[0-9]{1,3}){3}$' file.txt  # IP地址\ngrep -E '(https?://[^\\s]+)' file.txt   # URL\n\n# POSIX 字符类\ngrep '[[:digit:]]' file.txt          # 数字\ngrep '[[:alpha:]]' file.txt          # 字母\ngrep '[[:space:]]' file.txt          # 空白",
+           tip:"grep 默认用基本正则，加 -E 用扩展正则（推荐）。sed 默认基本正则，加 -E 扩展"},
+          {name:"正则表达式实战",
+           explain:"用正则配合 grep/sed/awk 解决实际问题。",
+           code:"# 验证手机号（中国）\necho \"13812345678\" | grep -E '^1[3-9][0-9]{9}$'\n\n# 提取日志中的时间戳\ngrep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}' log.txt\n\n# 用 sed 清理数据\n# 删除 HTML 标签\nsed 's/<[^>]*>//g' page.html\n\n# 提取引号中的内容\ngrep -oE '\"[^\"]+\"' config.json\n\n# 用 awk 提取匹配的字段\nawk '/^server/ {print $2}' nginx.conf\n\n# 替换日期格式 MM/DD/YYYY → YYYY-MM-DD\nsed -E 's|([0-9]{2})/([0-9]{2})/([0-9]{4})|\\3-\\1-\\2|g' dates.txt\n\n# 验证并提取 IP\nip_regex='^([0-9]{1,3}\\.){3}[0-9]{1,3}$'\nwhile read ip; do\n    if [[ $ip =~ $ip_regex ]]; then\n        echo \"有效IP: $ip\"\n    fi\ndone < ips.txt"}
+        ],
+        exercise:"用正则表达式：(1) 从一段混合文本中提取所有邮箱地址；(2) 验证用户输入的 IP 地址格式是否正确；(3) 把所有 YYYY/MM/DD 格式的日期转换为 YYYY-MM-DD。"
+      },
+      {
+        day:20, title:"Shell 环境与配置", tags:["环境变量","PATH","bashrc","alias"],
+        topics:[
+          {name:"环境变量与配置文件",
+           explain:"环境变量控制 Shell 的行为，配置文件决定你每次打开终端的初始环境。理解这些对管理开发环境非常重要。",
+           code:"# 常用环境变量\necho $HOME        # 用户主目录\necho $PATH        # 可执行文件搜索路径\necho $USER        # 当前用户\necho $SHELL       # 当前Shell\necho $LANG        # 语言设置\necho $EDITOR      # 默认编辑器\necho $PS1         # 命令提示符样式\n\n# 设置环境变量\nexport MY_PROJECT=/home/rick/manga_pipeline\nexport PATH=$HOME/.local/bin:$PATH   # 添加路径\n\n# 配置文件加载顺序\n# 登录Shell: /etc/profile → ~/.bash_profile → ~/.bashrc\n# 非登录Shell: ~/.bashrc\n\n# ~/.bashrc 常见配置\n# 别名\nalias ll='ls -lah'\nalias gs='git status'\nalias py='python3'\nalias ..='cd ..'\nalias ...='cd ../..'\n\n# 自定义函数\nmkcd() { mkdir -p \"$1\" && cd \"$1\"; }\n\n# 自定义 PS1 提示符\nexport PS1='\\[\\033[32m\\]\\u@\\h\\[\\033[0m\\]:\\[\\033[34m\\]\\w\\[\\033[0m\\]\\$ '\n\n# 修改后生效\nsource ~/.bashrc",
+           tip:"修改 .bashrc 后执行 source ~/.bashrc 立即生效，不用重开终端"},
+          {name:"PATH 管理与命令查找",
+           explain:"PATH 决定了你输入一个命令时系统去哪里找可执行文件。很多「命令找不到」的问题都是 PATH 没配对。",
+           code:"# 查看 PATH\necho $PATH | tr ':' '\\n'    # 每个路径一行\n\n# 添加路径\nexport PATH=$HOME/bin:$PATH          # 加到最前面（优先）\nexport PATH=$PATH:/opt/tools/bin     # 加到最后面\n\n# 查找命令位置\nwhich python3      # 可执行文件的路径\nwhereis python3    # 二进制+手册+源码\ntype ls            # 命令类型（内置/外部/别名）\ncommand -v git     # 判断命令是否存在\n\n# ESP32 开发相关 PATH\nexport IDF_PATH=~/esp/esp-idf\nexport PATH=$IDF_PATH/tools:$PATH\n\n# Python 虚拟环境\n# 激活后 PATH 自动添加 .venv/bin\nsource .venv/bin/activate\n\n# 永久添加（写入 .bashrc）\necho 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc"}
+        ],
+        exercise:"配置你的 .bashrc：添加 5 个常用别名、自定义命令提示符、创建一个 mkcd 函数（创建目录并进入）、确保 Python 和 ESP-IDF 的路径正确。"
+      },
+      {
+        day:21, title:"网络命令", tags:["网络","curl","wget","ssh","scp"],
+        topics:[
+          {name:"网络诊断与下载",
+           explain:"Shell 的网络命令让你可以直接从命令行测试网络、下载文件、调用 API。对于调试 ESP32 的 MQTT 连接、测试 API 接口非常实用。",
+           code:"# 网络诊断\nping -c 4 google.com              # 测试连通性\ntraceroute google.com             # 路径追踪\nnslookup google.com               # DNS 查询\ndig google.com                    # 更详细的 DNS\nifconfig / ip addr                # 网络接口信息\nnetstat -tlnp                     # 监听的端口\nss -tlnp                          # 同上（更现代）\n\n# curl - HTTP 瑞士军刀\ncurl https://api.github.com       # GET 请求\ncurl -s URL | jq .                # 静默+格式化JSON\ncurl -X POST -d '{\"key\":\"val\"}' -H 'Content-Type: application/json' URL\ncurl -o file.zip URL              # 下载并保存\ncurl -I URL                       # 只看响应头\ncurl -u user:pass URL             # 带认证\n\n# wget - 下载利器\nwget URL                          # 下载文件\nwget -c URL                       # 断点续传\nwget -r -np URL                   # 递归下载\nwget -O name.zip URL              # 指定文件名\n\n# MQTT 测试（ESP32 开发常用）\n# 安装: apt install mosquitto-clients\nmosquitto_pub -h broker -t topic -m \"hello\"\nmosquitto_sub -h broker -t topic",
+           tip:"curl + jq 是命令行调试 API 的最佳拍档。jq 需要安装：apt install jq"},
+          {name:"SSH 远程操作",
+           explain:"SSH 是远程管理服务器的标准工具。树莓派、云服务器、NAS 都靠它。",
+           code:"# SSH 连接\nssh user@192.168.1.100            # 基本连接\nssh -p 2222 user@host             # 指定端口\nssh -i key.pem user@host          # 用密钥登录\n\n# 免密登录配置\nssh-keygen -t ed25519             # 生成密钥对\nssh-copy-id user@host             # 复制公钥到服务器\n\n# SCP 文件传输\nscp file.txt user@host:/path/     # 上传\nscp user@host:/path/file.txt .    # 下载\nscp -r dir/ user@host:/path/      # 上传目录\n\n# rsync（更好的文件同步）\nrsync -avz ./project/ user@host:/project/\nrsync -avz --delete src/ dest/    # 同步+删除多余文件\nrsync -avz --exclude='*.pyc' src/ dest/\n\n# SSH 隧道（端口转发）\nssh -L 8080:localhost:80 user@host   # 本地转发\nssh -R 8080:localhost:3000 user@host # 远程转发\n\n# SSH Config（~/.ssh/config）\n# Host mypi\n#   HostName 192.168.1.50\n#   User pi\n#   Port 22\n#   IdentityFile ~/.ssh/id_rsa\n# 之后直接: ssh mypi"}
+        ],
+        exercise:"用 curl 调用一个公开 API（如天气 API），解析返回的 JSON；配置 SSH 免密登录到你的树莓派或服务器；用 rsync 同步一个项目目录。"
+      },
+      {
+        day:22, title:"定时任务 cron 与 systemd", tags:["cron","systemd","定时","自动化"],
+        topics:[
+          {name:"crontab 定时任务",
+           explain:"cron 是 Linux 的定时任务调度器，可以让脚本按时自动执行。监控脚本、备份任务、数据采集都靠它。",
+           code:"# crontab 格式\n# 分 时 日 月 星期  命令\n# *  *  *  *  *     command\n\n# 编辑定时任务\ncrontab -e\n\n# 查看当前任务\ncrontab -l\n\n# 示例\n# 每天凌晨2点备份\n0 2 * * * /home/rick/backup.sh >> /var/log/backup.log 2>&1\n\n# 每5分钟检查一次\n*/5 * * * * /home/rick/health_check.sh\n\n# 每周一早上9点\n0 9 * * 1 /home/rick/weekly_report.sh\n\n# 每月1号\n0 0 1 * * /home/rick/monthly_cleanup.sh\n\n# 每天早晚8点\n0 8,20 * * * /home/rick/sync_data.sh\n\n# 工作日每小时\n0 * * * 1-5 /home/rick/monitor.sh\n\n# 重要：cron 环境没有你的 .bashrc！\n# 需要写完整路径，或在脚本开头设置\n# PATH=/usr/local/bin:/usr/bin:/bin\n# 或 source ~/.bashrc",
+           tip:"cron 任务调试困难，一定要把输出重定向到日志文件 >> log 2>&1，方便排查问题"},
+          {name:"systemd 服务管理",
+           explain:"systemd 是现代 Linux 的服务管理系统。当你需要一个程序开机自启、崩溃自动重启，就用 systemd。",
+           code:"# 管理服务\nsudo systemctl start nginx        # 启动\nsudo systemctl stop nginx         # 停止\nsudo systemctl restart nginx      # 重启\nsudo systemctl status nginx       # 查看状态\nsudo systemctl enable nginx       # 开机自启\nsudo systemctl disable nginx      # 取消自启\n\n# 查看日志\njournalctl -u nginx               # 指定服务日志\njournalctl -u nginx -f            # 实时追踪\njournalctl --since today          # 今天的日志\n\n# 创建自己的服务\n# /etc/systemd/system/myapp.service\n# [Unit]\n# Description=My Application\n# After=network.target\n#\n# [Service]\n# Type=simple\n# User=rick\n# WorkingDirectory=/home/rick/app\n# ExecStart=/usr/bin/python3 app.py\n# Restart=always\n# RestartSec=5\n# Environment=NODE_ENV=production\n#\n# [Install]\n# WantedBy=multi-user.target\n\n# 加载新服务\nsudo systemctl daemon-reload\nsudo systemctl start myapp\nsudo systemctl enable myapp"}
+        ],
+        exercise:"(1) 用 crontab 设置一个每小时执行的磁盘检查任务；(2) 创建一个 systemd service 把你的 Python 脚本变成自启动服务。"
+      },
+      {
+        day:23, title:"Shell 脚本调试与错误处理", tags:["调试","set","trap","错误处理"],
+        topics:[
+          {name:"调试技巧",
+           explain:"Shell 脚本的调试比 Python 难，因为没有像样的 debugger。但有一些内置机制能帮你定位问题。",
+           code:"#!/bin/bash\n\n# set 选项（脚本开头加这些）\nset -e          # 遇到错误立即退出\nset -u          # 使用未定义变量报错\nset -o pipefail # 管道中任何命令失败则整体失败\nset -x          # 调试模式：打印每条执行的命令\n\n# 推荐组合（脚本开头必加）\nset -euo pipefail\n\n# 只对部分代码开启调试\nset -x\n# 这段代码会显示执行过程\nresult=$(calculate_something)\nset +x\n\n# 运行时调试\nbash -x script.sh          # 调试模式运行\nbash -n script.sh          # 只检查语法不执行\nbash -v script.sh          # 显示读取的命令\n\n# ShellCheck（强烈推荐！）\n# 安装: apt install shellcheck\nshellcheck script.sh       # 静态分析\n# 能检测出：\n# - 变量没加引号\n# - 用了已废弃的语法\n# - 常见陷阱\n\n# 自定义调试函数\ndebug() {\n    [[ $DEBUG == true ]] && echo -e \"\\033[33m[DEBUG]\\033[0m $*\" >&2\n}\nDEBUG=true\ndebug \"变量值: $var\"",
+           tip:"每个新脚本第一行加 set -euo pipefail，它能帮你避免 90% 的 Shell 坑"},
+          {name:"trap 与错误处理",
+           explain:"trap 命令可以在脚本退出、出错、收到信号时执行清理代码，类似 Python 的 try/finally。",
+           code:"#!/bin/bash\nset -euo pipefail\n\n# 清理函数\ncleanup() {\n    echo \"清理临时文件...\"\n    rm -f /tmp/myapp_*\n    echo \"清理完成\"\n}\n\n# 注册 trap\ntrap cleanup EXIT          # 脚本退出时执行\ntrap cleanup ERR           # 出错时执行\ntrap 'echo 收到中断; exit 1' INT    # Ctrl+C\ntrap 'echo 收到终止; exit 1' TERM   # kill\n\n# 临时文件安全模式\nTMP_FILE=$(mktemp /tmp/myapp_XXXXXX)\ntrap 'rm -f $TMP_FILE' EXIT\necho \"data\" > \"$TMP_FILE\"\n\n# 错误处理模式\nerror_handler() {\n    local line=$1\n    local cmd=$2\n    local code=$3\n    echo \"错误：第 ${line} 行命令 '${cmd}' 失败（退出码: ${code}）\"\n}\ntrap 'error_handler ${LINENO} \"$BASH_COMMAND\" $?' ERR\n\n# || 操作符（命令失败时的备选）\ncd /some/dir || { echo \"目录不存在\"; exit 1; }\nmkdir -p /path || true    # 失败了也不退出\n\n# 函数返回值检查\nif ! validate_input \"$1\"; then\n    echo \"输入无效\"\n    exit 1\nfi"}
+        ],
+        exercise:"给你之前写的系统监控脚本加上：set -euo pipefail、trap 清理临时文件、错误处理函数、用 ShellCheck 检查并修复所有警告。"
+      },
+      {
+        day:24, title:"实战项目：自动化部署脚本", tags:["项目","部署","Git"],
+        topics:[
+          {name:"Git 操作自动化",
+           explain:"用 Shell 脚本自动化 Git 工作流，适合频繁提交的项目。",
+           code:"#!/bin/bash\nset -euo pipefail\n\n# 快速提交推送\ngit_push() {\n    local msg=\"${1:-auto commit $(date '+%Y-%m-%d %H:%M')}\"\n    git add -A\n    git status\n    git commit -m \"$msg\"\n    git push\n    echo \"已推送: $msg\"\n}\n\n# 检查 Git 仓库状态\ngit_status_check() {\n    if ! git rev-parse --is-inside-work-tree &>/dev/null; then\n        echo \"不在 Git 仓库中\"\n        return 1\n    fi\n    local branch=$(git branch --show-current)\n    local changes=$(git status --porcelain | wc -l)\n    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)\n    echo \"分支: $branch | 变更: $changes | 未推: $ahead\"\n}\n\n# 批量更新所有仓库\nupdate_all_repos() {\n    local base_dir=\"${1:-$HOME/projects}\"\n    for dir in \"$base_dir\"/*/; do\n        if [ -d \"$dir/.git\" ]; then\n            echo \"更新: $dir\"\n            (cd \"$dir\" && git pull --rebase)\n        fi\n    done\n}"},
+          {name:"项目部署脚本",
+           explain:"一个完整的自动化部署脚本模板，适合 Web 项目或 Python 服务。",
+           code:"#!/bin/bash\nset -euo pipefail\n\nAPP_NAME=\"manga-pipeline\"\nDEPLOY_DIR=\"/opt/$APP_NAME\"\nBACKUP_DIR=\"/opt/backups/$APP_NAME\"\nLOG_FILE=\"/var/log/${APP_NAME}-deploy.log\"\n\nlog()  { echo \"[$(date '+%H:%M:%S')] $*\" | tee -a \"$LOG_FILE\"; }\ndie()  { log \"ERROR: $*\"; exit 1; }\n\n# 前置检查\npre_check() {\n    log \"=== 开始部署 ===\"\n    command -v python3 >/dev/null || die \"Python3 未安装\"\n    command -v git >/dev/null || die \"Git 未安装\"\n    [ -d \"$DEPLOY_DIR\" ] || die \"部署目录不存在\"\n}\n\n# 备份\nbackup() {\n    log \"备份当前版本...\"\n    local ts=$(date +%Y%m%d_%H%M%S)\n    mkdir -p \"$BACKUP_DIR\"\n    tar czf \"$BACKUP_DIR/${ts}.tar.gz\" -C \"$DEPLOY_DIR\" .\n    log \"备份完成: ${ts}.tar.gz\"\n}\n\n# 部署\ndeploy() {\n    log \"拉取最新代码...\"\n    cd \"$DEPLOY_DIR\"\n    git pull origin main\n    \n    log \"安装依赖...\"\n    pip3 install -r requirements.txt -q\n    \n    log \"重启服务...\"\n    sudo systemctl restart \"$APP_NAME\"\n    sleep 3\n    \n    if systemctl is-active --quiet \"$APP_NAME\"; then\n        log \"部署成功！服务运行中\"\n    else\n        log \"服务启动失败，回滚...\"\n        rollback\n    fi\n}\n\n# 回滚\nrollback() {\n    local latest=$(ls -t \"$BACKUP_DIR\"/*.tar.gz | head -1)\n    [ -f \"$latest\" ] || die \"没有备份可回滚\"\n    log \"回滚到: $latest\"\n    tar xzf \"$latest\" -C \"$DEPLOY_DIR\"\n    sudo systemctl restart \"$APP_NAME\"\n}\n\npre_check\nbackup\ndeploy"}
+        ],
+        exercise:"为你的漫剧流水线项目写一个 deploy.sh：支持 deploy/rollback/status 三个子命令，包含代码拉取、依赖安装、服务重启、失败回滚。"
+      },
+      {
+        day:25, title:"文本处理高级技巧", tags:["jq","JSON","CSV","日志分析"],
+        topics:[
+          {name:"jq - JSON 处理",
+           explain:"jq 是命令行的 JSON 瑞士军刀。在调用 API、处理配置文件、解析 ComfyUI/Home Assistant 数据时极其有用。",
+           code:"# 基本用法\necho '{\"name\":\"Rick\",\"age\":27}' | jq '.name'\n# \"Rick\"\n\n# 嵌套访问\necho '{\"user\":{\"name\":\"Rick\",\"skills\":[\"python\",\"shell\"]}}' | jq '.user.skills[0]'\n# \"python\"\n\n# 数组操作\necho '[1,2,3,4,5]' | jq '.[] | select(. > 3)'\n# 4  5\n\n# 实战：GitHub API\ncurl -s https://api.github.com/users/octocat | jq '{\n    name: .name,\n    company: .company,\n    repos: .public_repos,\n    followers: .followers\n}'\n\n# 从数组中筛选\ncurl -s API_URL | jq '.items[] | select(.price < 100) | {name, price}'\n\n# 修改 JSON\njq '.port = 8080 | .debug = true' config.json > new_config.json\n\n# CSV 转 JSON\njq -R 'split(\",\") | {name:.[0], score:.[1]}' data.csv\n\n# JSON 转 CSV\njq -r '.[] | [.name, .age] | @csv' data.json",
+           tip:"jq 的 -r 参数去掉输出的引号，写入文件时经常需要"},
+          {name:"日志分析实战",
+           explain:"用 Shell 工具链分析真实日志文件的实战技巧。",
+           code:"# 分析 Nginx access log\n# 格式: IP - - [time] \"method path\" status size\n\n# Top 10 IP\nawk '{print $1}' access.log | sort | uniq -c | sort -rn | head -10\n\n# 每小时请求量\nawk '{print substr($4,14,2)}' access.log | sort | uniq -c\n\n# 状态码统计\nawk '{print $9}' access.log | sort | uniq -c | sort -rn\n\n# 最慢的请求\nawk '{print $NF, $7}' access.log | sort -rn | head -10\n\n# 404 的 URL\nawk '$9==404 {print $7}' access.log | sort | uniq -c | sort -rn\n\n# 实时监控错误\ntail -f app.log | grep --line-buffered 'ERROR' | while read line; do\n    echo \"[$(date)] ALERT: $line\"\n    # 可以在这里发通知\ndone\n\n# 日志时间范围筛选\nawk '/2026-03-22 10:00/,/2026-03-22 11:00/' app.log\n\n# 统计每分钟错误数\ngrep 'ERROR' app.log | awk '{print substr($1,1,16)}' | uniq -c"}
+        ],
+        exercise:"(1) 用 curl + jq 获取 GitHub 某个仓库的信息并格式化显示；(2) 创建一个日志分析脚本，统计错误数、Top IP、状态码分布。"
+      },
+      {
+        day:26, title:"Shell 与 Python 协作", tags:["Python","混合编程","自动化"],
+        topics:[
+          {name:"Shell 调用 Python",
+           explain:"Shell 适合文件操作和系统管理，Python 适合复杂逻辑和数据处理。把两者结合起来才是最强的自动化方案。",
+           code:"#!/bin/bash\n\n# 直接在 Shell 中嵌入 Python\npython3 << 'PYEOF'\nimport json, sys\ndata = {\"name\": \"Rick\", \"project\": \"manga\"}\nprint(json.dumps(data, indent=2))\nPYEOF\n\n# 获取 Python 的返回值\nresult=$(python3 -c \"print(2**10)\")\necho \"2的10次方 = $result\"\n\n# 用 Python 处理 JSON（比 jq 更灵活时）\ncurl -s API_URL | python3 -c \"\nimport json, sys\ndata = json.load(sys.stdin)\nfor item in data['results']:\n    print(f\\\"{item['name']}: {item['score']}\\\")\n\"\n\n# Shell 传参给 Python\n#!/bin/bash\nFILE_PATH=\"$1\"\npython3 << PYEOF\nimport csv\nwith open('$FILE_PATH') as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        print(f\"{row['name']}: {row['score']}\")\nPYEOF\n\n# Python 脚本里调用 Shell\n# 在 Python 中:\nimport subprocess\nresult = subprocess.run(['ls', '-la'], capture_output=True, text=True)\nprint(result.stdout)",
+           tip:"简单的文件操作用 Shell，复杂的数据处理和 API 调用用 Python，各取所长"},
+          {name:"ESP32 开发中的 Shell 自动化",
+           explain:"结合你的硬件项目，用 Shell 自动化 ESP32 开发工作流。",
+           code:"#!/bin/bash\n# esp_workflow.sh - ESP32 开发辅助脚本\n\nPORT=${1:-/dev/ttyUSB0}\nBAUD=115200\n\n# 检测串口\ndetect_port() {\n    local ports=$(ls /dev/ttyUSB* /dev/ttyACM* 2>/dev/null)\n    if [ -z \"$ports\" ]; then\n        echo \"未检测到串口设备\"\n        return 1\n    fi\n    echo \"可用串口:\"\n    echo \"$ports\"\n}\n\n# 监控串口输出\nmonitor() {\n    echo \"监控 $PORT @ $BAUD ...\"\n    # 用 screen 或 minicom\n    screen $PORT $BAUD\n}\n\n# 编译并上传（PlatformIO）\nbuild_upload() {\n    echo \"编译中...\"\n    pio run || { echo \"编译失败\"; return 1; }\n    echo \"上传中...\"\n    pio run -t upload --upload-port $PORT\n    echo \"完成！\"\n}\n\n# OTA 更新\nota_update() {\n    local ip=\"$1\"\n    local firmware=\".pio/build/esp32/firmware.bin\"\n    [ -f \"$firmware\" ] || { echo \"固件不存在\"; return 1; }\n    curl -F \"image=@$firmware\" \"http://$ip/update\"\n}\n\ncase ${1:-help} in\n    detect)  detect_port ;;\n    monitor) monitor ;;\n    build)   build_upload ;;\n    ota)     ota_update \"$2\" ;;\n    *)       echo \"用法: $0 {detect|monitor|build|ota <ip>}\" ;;\nesac"}
+        ],
+        exercise:"写一个 Shell+Python 混合脚本：Shell 负责检测 ESP32 串口、编译上传固件；Python 负责解析串口数据并保存到 CSV。"
+      },
+      {
+        day:27, title:"安全与最佳实践", tags:["安全","最佳实践","ShellCheck"],
+        topics:[
+          {name:"Shell 脚本安全准则",
+           explain:"Shell 脚本的安全问题比 Python 更容易被忽视，但后果可能更严重（毕竟直接操作系统）。",
+           code:"#!/bin/bash\nset -euo pipefail\n\n# 1. 永远给变量加引号\nfile=\"my file.txt\"\nrm \"$file\"          # 正确\n# rm $file           # 危险！会变成 rm my file.txt\n\n# 2. 检查命令是否存在\ncommand -v docker >/dev/null 2>&1 || {\n    echo \"Docker 未安装\"\n    exit 1\n}\n\n# 3. 用 mktemp 创建临时文件\ntmp=$(mktemp)\ntrap 'rm -f \"$tmp\"' EXIT\n\n# 4. 不要用 eval（注入风险）\n# eval \"$user_input\"   # 极度危险！\n\n# 5. 输入验证\nvalidate_port() {\n    local port=\"$1\"\n    if ! [[ \"$port\" =~ ^[0-9]+$ ]] || [ \"$port\" -lt 1 ] || [ \"$port\" -gt 65535 ]; then\n        echo \"无效端口: $port\"\n        return 1\n    fi\n}\n\n# 6. 路径安全\n# 使用绝对路径\nREAL_PATH=$(realpath \"$0\")\nSCRIPT_DIR=$(dirname \"$REAL_PATH\")\n\n# 7. 防止重复运行\nLOCK_FILE=\"/tmp/myscript.lock\"\nif ! mkdir \"$LOCK_FILE\" 2>/dev/null; then\n    echo \"脚本已在运行\"\n    exit 1\nfi\ntrap 'rmdir \"$LOCK_FILE\"' EXIT",
+           tip:"ShellCheck 是必备工具，它能发现你肉眼看不到的安全问题"},
+          {name:"脚本模板",
+           explain:"一个生产级 Shell 脚本的标准模板，包含你需要的所有最佳实践。",
+           code:"#!/usr/bin/env bash\n#\n# 脚本名称: template.sh\n# 描述: 脚本功能描述\n# 作者: Rick\n# 日期: 2026-03-22\n# 用法: ./template.sh [-v] [-h] <参数>\n#\nset -euo pipefail\nIFS=$'\\n\\t'\n\n# === 常量 ===\nreadonly SCRIPT_DIR=$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\nreadonly SCRIPT_NAME=$(basename \"$0\")\nreadonly LOG_FILE=\"/tmp/${SCRIPT_NAME%.*}.log\"\n\n# === 颜色 ===\nreadonly RED='\\033[31m' GREEN='\\033[32m'\nreadonly YELLOW='\\033[33m' NC='\\033[0m'\n\n# === 函数 ===\nlog()   { echo -e \"${GREEN}[INFO]${NC}  $(date '+%H:%M:%S') $*\" | tee -a \"$LOG_FILE\"; }\nwarn()  { echo -e \"${YELLOW}[WARN]${NC}  $(date '+%H:%M:%S') $*\" | tee -a \"$LOG_FILE\"; }\nerr()   { echo -e \"${RED}[ERROR]${NC} $(date '+%H:%M:%S') $*\" | tee -a \"$LOG_FILE\" >&2; }\ndie()   { err \"$*\"; exit 1; }\n\nusage() {\n    cat << EOF\n用法: $SCRIPT_NAME [选项] <参数>\n\n选项:\n  -v    详细模式\n  -h    显示帮助\nEOF\n    exit 0\n}\n\ncleanup() {\n    log \"清理中...\"\n    # 清理临时文件等\n}\ntrap cleanup EXIT\n\n# === 参数解析 ===\nVERBOSE=false\nwhile getopts ':vh' opt; do\n    case $opt in\n        v) VERBOSE=true ;;\n        h) usage ;;\n        ?) die \"未知选项: -$OPTARG\" ;;\n    esac\ndone\nshift $((OPTIND-1))\n\n# === 主逻辑 ===\nmain() {\n    log \"开始执行 $SCRIPT_NAME\"\n    # 你的代码写在这里\n    log \"执行完成\"\n}\n\nmain \"$@\""}
+        ],
+        exercise:"用脚本模板重写你之前的系统监控脚本，加入完整的错误处理、参数解析、日志记录。然后用 ShellCheck 检查并修复所有问题。"
+      },
+      {
+        day:28, title:"Docker 与容器管理", tags:["Docker","容器","devops"],
+        topics:[
+          {name:"Docker 命令行操作",
+           explain:"Docker 几乎所有操作都通过命令行完成，掌握 Shell 后用 Docker 会非常顺畅。对于跑 ComfyUI、Home Assistant 等服务特别有用。",
+           code:"# 镜像管理\ndocker pull nginx:latest\ndocker images\ndocker rmi image_id\n\n# 容器生命周期\ndocker run -d --name myapp -p 8080:80 nginx\ndocker ps                    # 运行中的容器\ndocker ps -a                 # 所有容器\ndocker stop myapp\ndocker start myapp\ndocker rm myapp\n\n# 进入容器\ndocker exec -it myapp bash\ndocker logs -f myapp         # 实时看日志\n\n# Docker Compose\ndocker compose up -d\ndocker compose down\ndocker compose logs -f\ndocker compose ps\n\n# 实用脚本：清理 Docker\ndocker system prune -a       # 清理所有无用资源\ndocker volume prune          # 清理无用数据卷\n\n# Home Assistant Docker 管理\ndocker run -d \\\n  --name homeassistant \\\n  --restart=unless-stopped \\\n  -v /opt/homeassistant:/config \\\n  -p 8123:8123 \\\n  ghcr.io/home-assistant/home-assistant:stable",
+           tip:"Docker Compose 文件用 YAML 写，你的 ESPHome 配置经验可以直接迁移"}
+        ],
+        exercise:"用 Docker Compose 创建一个开发环境：包含 Python 应用 + Redis + Nginx 反向代理，写一个管理脚本支持 start/stop/logs/rebuild 操作。"
+      },
+      {
+        day:29, title:"实战项目：漫剧流水线管理器", tags:["项目","自动化","流水线"],
+        topics:[
+          {name:"综合项目：生产流水线 CLI 工具",
+           explain:"结合你的漫剧流水线项目需求，构建一个 Shell CLI 工具来管理整个流程。",
+           code:"#!/usr/bin/env bash\nset -euo pipefail\n\n# manga_cli.sh - 漫剧流水线管理工具\nreadonly VERSION=\"1.0.0\"\nreadonly PROJECT_ROOT=\"$HOME/manga-pipeline\"\nreadonly OUTPUT_DIR=\"$PROJECT_ROOT/output\"\nreadonly LOG_DIR=\"$PROJECT_ROOT/logs\"\n\n# 确保目录存在\nmkdir -p \"$OUTPUT_DIR\" \"$LOG_DIR\"\n\nlog() { echo \"[$(date '+%H:%M:%S')] $*\" | tee -a \"$LOG_DIR/pipeline.log\"; }\n\n# 脚本解析\nparse_script() {\n    local script_file=\"$1\"\n    [ -f \"$script_file\" ] || { log \"脚本文件不存在: $script_file\"; return 1; }\n    \n    local scenes=$(grep -c '## 场景' \"$script_file\" || echo 0)\n    local chars=$(grep -oE '【[^】]+】' \"$script_file\" | sort -u | wc -l)\n    \n    log \"脚本分析: $scenes 个场景, $chars 个角色\"\n    echo \"场景数: $scenes\"\n    echo \"角色数: $chars\"\n    echo \"角色列表:\"\n    grep -oE '【[^】]+】' \"$script_file\" | sort -u\n}\n\n# 生成分镜JSON\ngenerate_storyboard() {\n    local script_file=\"$1\"\n    local output_file=\"$OUTPUT_DIR/storyboard_$(date +%Y%m%d).json\"\n    \n    python3 << PYEOF\nimport json, re\nscenes = []\nwith open('$script_file') as f:\n    content = f.read()\n    for i, scene in enumerate(re.split(r'## 场景', content)[1:], 1):\n        lines = scene.strip().split('\\n')\n        scenes.append({\n            'scene_id': i,\n            'title': lines[0].strip() if lines else f'Scene {i}',\n            'content': '\\n'.join(lines[1:]).strip()\n        })\nwith open('$output_file', 'w') as f:\n    json.dump(scenes, f, ensure_ascii=False, indent=2)\nprint(f'生成 {len(scenes)} 个场景 → $output_file')\nPYEOF\n}\n\n# 批量生图\nbatch_generate() {\n    local storyboard=\"$1\"\n    local total=$(jq length \"$storyboard\")\n    log \"开始生成 $total 张图片...\"\n    for i in $(seq 0 $((total-1))); do\n        local prompt=$(jq -r \".[$i].content\" \"$storyboard\")\n        log \"生成第 $((i+1))/$total 张...\"\n        # 这里调用 ComfyUI API\n        sleep 1  # 模拟\n    done\n    log \"批量生成完成\"\n}\n\ncase ${1:-help} in\n    parse)      parse_script \"${2:-}\" ;;\n    storyboard) generate_storyboard \"${2:-}\" ;;\n    generate)   batch_generate \"${2:-}\" ;;\n    status)     echo \"项目: $PROJECT_ROOT\"; ls -la \"$OUTPUT_DIR\" ;;\n    version)    echo \"$VERSION\" ;;\n    *)          echo \"用法: $0 {parse|storyboard|generate|status} [file]\" ;;\nesac"}
+        ],
+        exercise:"扩展这个 CLI 工具：加入进度条显示、错误重试机制、并行处理多张图片、输出质量检查报告。"
+      },
+      {
+        day:30, title:"总结与高阶方向", tags:["复盘","进阶","工具推荐"],
+        topics:[
+          {name:"30天知识图谱回顾",
+           explain:"恭喜完成 Shell 30天学习！回顾你掌握的核心技能树。",
+           code:"# 你现在掌握的技能树：\n#\n# Shell 基础\n# ├── 文件系统导航 (cd, ls, pwd)\n# ├── 文件操作 (cp, mv, rm, mkdir)\n# ├── 权限管理 (chmod, chown)\n# ├── 重定向和管道 (>, >>, |, tee)\n# └── 文本查看 (cat, less, head, tail, grep)\n#\n# Shell 脚本编程\n# ├── 变量与字符串\n# ├── 数组\n# ├── 条件判断 (if, case)\n# ├── 循环 (for, while)\n# ├── 函数\n# └── 参数处理 (getopts)\n#\n# 文本处理\n# ├── grep + 正则表达式\n# ├── sed 流编辑器\n# ├── awk 列处理\n# ├── sort, uniq, cut, tr\n# └── jq (JSON处理)\n#\n# 系统管理\n# ├── 进程管理 (ps, kill, jobs)\n# ├── 定时任务 (cron)\n# ├── systemd 服务\n# ├── 网络命令 (curl, ssh, rsync)\n# └── Docker 容器\n#\n# 工程实践\n# ├── 调试 (set -euo pipefail, ShellCheck)\n# ├── 错误处理 (trap)\n# ├── 安全最佳实践\n# └── Shell + Python 协作"},
+          {name:"推荐进阶方向与资源",
+           explain:"后续可以深入的方向，根据你的需求选择。",
+           code:"# 进阶方向：\n\n# 1. Zsh + Oh My Zsh\n#    更强大的 Shell，自动补全、插件生态、主题\n#    所有 Bash 知识都可以迁移\n\n# 2. tmux / screen 多路复用\n#    远程服务器必备，多窗口多面板\n\n# 3. 高级 awk 编程\n#    awk 本身是图灵完备的语言\n\n# 4. Makefile\n#    项目构建自动化，比 Shell 更适合多步构建\n\n# 5. Ansible / 基础设施自动化\n#    管理多台服务器\n\n# 推荐资源：\n# 书：《Linux Command Line and Shell Scripting Bible》\n# 书：《The Linux Command Line》(免费在线版)\n# 网站：explainshell.com（粘贴命令自动解释）\n# 网站：shellcheck.net（在线语法检查）\n# 练习：overthewire.org/wargames/bandit（闯关学Linux）\n# 练习：cmdchallenge.com（Shell命令挑战）"}
+        ],
+        exercise:"写一个「一键初始化开发环境」脚本：检测操作系统、安装必要工具（git/python/docker/jq等）、配置 .bashrc/.zshrc、创建项目目录结构、设置 SSH 密钥。"
+      }
+    ]
+  }
+];
+
+// 把天数从嵌套结构中整理出来分阶段
+function getPhaseForDay(d) {
+  if(d <= 7) return "第一阶段：基础命令";
+  if(d <= 14) return "第二阶段：脚本编程";
+  if(d <= 19) return "第三阶段：文本处理";
+  if(d <= 23) return "第四阶段：系统管理";
+  if(d <= 30) return "第五阶段：综合实战";
+}
+
+function getAllDays() { return curriculum[0].days; }
+
+function getDayStatus(n) {
+  if(completed.includes(n)) return "completed";
+  const s = new Date(startDate), t = new Date(); t.setHours(0,0,0,0);
+  const target = new Date(s); target.setDate(s.getDate()+n-1);
+  if(target.toDateString()===t.toDateString()) return "today";
+  return "available";
+}
+
+function toggleComplete(d) {
+  if(completed.includes(d)) completed = completed.filter(x=>x!==d);
+  else completed.push(d);
+  localStorage.setItem("shell30_done", JSON.stringify(completed));
+  render();
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function openModal(dayNum) {
+  const day = getAllDays().find(d => d.day === dayNum);
+  if(!day) return;
+  const status = getDayStatus(dayNum);
+  const isDone = completed.includes(dayNum);
+  let html = `
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-day">DAY ${String(day.day).padStart(2,'0')} ${status==='today'?'· 今日课程':''}</div>
+    <div class="modal-title">${day.title}</div>
+    <div class="modal-tags">${day.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+  `;
+  if(day.topics) {
+    day.topics.forEach((topic, i) => {
+      html += `
+        <div class="topic-block">
+          <div class="topic-head" onclick="toggleTopic(this)">
+            <span class="topic-name">${topic.name}</span>
+            <span class="topic-toggle">▼</span>
+          </div>
+          <div class="topic-body ${i===0?'open':''}">
+            <div class="topic-explain">${topic.explain}</div>
+            <pre class="code-block">${highlightShell(topic.code)}</pre>
+            ${topic.tip ? `<div class="tip-box">${topic.tip}</div>` : ''}
+          </div>
+        </div>
+      `;
+    });
+  }
+  if(day.exercise) {
+    html += `
+      <div class="exercise-box">
+        <h4>练习</h4>
+        <p>${day.exercise}</p>
+      </div>
+    `;
+  }
+  html += `<button class="modal-complete ${isDone?'done':''}" onclick="toggleComplete(${dayNum});openModal(${dayNum})">${isDone?'✓ 已完成 — 点击取消':'标记为已完成'}</button>`;
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleTopic(el) {
+  const body = el.nextElementSibling;
+  const toggle = el.querySelector('.topic-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▼' : '▶';
+}
+
+function highlightShell(code) {
+  var lines = code.split('\n');
+  var result = lines.map(function(line) {
+    var escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // 检测是否是纯注释行（行首可选空格后跟 # ）或 shebang
+    if (/^\s*#/.test(escaped)) {
+      return '<span class="comment">' + escaped + '</span>';
+    }
+    // 处理行尾注释：找到代码部分和注释部分
+    var codePart = escaped;
+    var commentPart = '';
+    // 简单启发式：找不在引号内的 # （前面是空格）
+    var inSingle = false, inDouble = false, splitIdx = -1;
+    for (var i = 0; i < escaped.length; i++) {
+      var ch = escaped[i];
+      if (ch === "'" && !inDouble) inSingle = !inSingle;
+      else if (ch === '"' && !inSingle) inDouble = !inDouble;
+      else if (ch === '#' && !inSingle && !inDouble) {
+        // 确认不是 ${# 或 $# 等变量语法
+        if (i > 0 && (escaped[i-1] === '{' || escaped[i-1] === '$')) continue;
+        splitIdx = i;
+        break;
+      }
+    }
+    if (splitIdx > 0) {
+      codePart = escaped.substring(0, splitIdx);
+      commentPart = '<span class="comment">' + escaped.substring(splitIdx) + '</span>';
+    }
+    // 高亮代码部分
+    codePart = codePart
+      .replace(/\b(if|then|else|elif|fi|for|do|done|while|until|case|esac|function|return|local|readonly|export|declare|set|trap|shift|break|continue|in)\b/g,'<span class="keyword">$1</span>')
+      .replace(/(\$\{?[\w@#?!*]+\}?)/g,'<span class="var">$1</span>')
+      .replace(/"([^"]*?)"/g,'"<span class="string">$1</span>"')
+      .replace(/'([^']*?)'/g,"'<span class=\"string\">$1</span>'");
+    return codePart + commentPart;
+  });
+  return result.join('\n');
+}
+
+function render() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const days = getAllDays();
+  let html = '';
+  let currentPhase = '';
+
+  const filtered = days.filter(d => {
+    const status = getDayStatus(d.day);
+    const isDone = completed.includes(d.day);
+    if(currentFilter === 'done' && !isDone) return false;
+    if(currentFilter === 'todo' && isDone) return false;
+    if(query) {
+      const searchable = `${d.title} ${d.tags.join(' ')} ${(d.topics||[]).map(t=>t.name).join(' ')}`.toLowerCase();
+      if(!searchable.includes(query)) return false;
+    }
+    return true;
+  });
+
+  filtered.forEach(day => {
+    const phase = getPhaseForDay(day.day);
+    if(phase !== currentPhase) {
+      if(currentPhase) html += '</div>';
+      currentPhase = phase;
+      html += `<div class="phase-title">${phase}</div><div class="grid">`;
+    }
+    const status = getDayStatus(day.day);
+    const isDone = completed.includes(day.day);
+    const preview = (day.topics||[]).map(t=>t.name).join(' · ');
+    html += `
+      <div class="card ${status} ${isDone?'completed':''}" onclick="openModal(${day.day})">
+        <div class="card-head">
+          <span class="day-num">DAY ${String(day.day).padStart(2,'0')}</span>
+          ${isDone?'<span class="badge done">✓ Done</span>':status==='today'?'<span class="badge now">Today</span>':''}
+        </div>
+        <div class="card-title">${day.title}</div>
+        <div class="card-tags">${day.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-preview">${preview}</div>
+        <div class="card-foot">
+          <button class="complete-btn ${isDone?'done':''}" onclick="event.stopPropagation();toggleComplete(${day.day})">
+            ${isDone?'✓ 完成':'标记完成'}
+          </button>
+          <button class="detail-btn" onclick="event.stopPropagation();openModal(${day.day})">查看详情 →</button>
+        </div>
+      </div>
+    `;
+  });
+  if(currentPhase) html += '</div>';
+  if(!html) html = '<div style="text-align:center;padding:3rem;color:var(--muted)">没有匹配的课程</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Update stats
+  const doneCount = completed.length;
+  document.getElementById('s-done').textContent = `${doneCount}/30`;
+  document.getElementById('s-pct').textContent = `${Math.round(doneCount/30*100)}%`;
+  document.getElementById('pbar').style.width = `${doneCount/30*100}%`;
+
+  // Current phase
+  const nextDay = days.find(d => !completed.includes(d.day));
+  document.getElementById('s-phase').textContent = nextDay ? getPhaseForDay(nextDay.day).replace('第','').split('：')[0] : '完成!';
+
+  // Streak
+  let streak = 0;
+  for(let i = 1; i <= 30; i++) {
+    if(completed.includes(i)) streak++;
+    else break;
+  }
+  document.getElementById('s-streak').textContent = streak;
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeModal();
+});
+
+render();
+
+// Daily reminder
+setTimeout(() => {
+  const today = getAllDays().find(d => getDayStatus(d.day)==='today');
+  if(today && !completed.includes(today.day)) {
+    showToast(`今日课程: Day ${today.day} — ${today.title}`);
+  }
+}, 1500);
+</script>
+</body>
+</html>
