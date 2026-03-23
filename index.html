@@ -1,556 +1,1466 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rick — Builder / Creator / Producer</title>
+<title>Rick — Producer · Developer · Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#06080d;
-  --surface:#0c1018;
-  --card:#111827;
+  --bg:#08090e;
+  --surface:#0e1117;
+  --card:#12161f;
+  --card-hover:#181d28;
   --border:rgba(255,255,255,.06);
+  --border-hover:rgba(255,255,255,.14);
   --text:#e2e8f0;
-  --muted:#64748b;
-  --green:#22d3ee;
-  --green2:#3ecf8e;
-  --pink:#f472b6;
-  --amber:#fbbf24;
-  --blue:#60a5fa;
-  --purple:#a78bfa;
+  --text-dim:#94a3b8;
+  --muted:#556478;
+  --cyan:#22d3ee;
+  --teal:#2dd4bf;
+  --amber:#f6ad3c;
+  --warm:#e8a55a;
+  --pink:#ec6b9a;
+  --blue:#5b9cf6;
+  --purple:#9d8cf6;
+  --red:#ef6461;
+  --film-gold:#d4a853;
+  --film-warm:rgba(212,168,83,.08);
   --mono:'Space Mono',monospace;
-  --sans:'Outfit',sans-serif;
+  --sans:'Outfit','Noto Sans SC',sans-serif;
+  --page-pad:clamp(1.5rem,6vw,7rem);
+  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:default}
-::selection{background:var(--green);color:#000}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
+::selection{background:var(--cyan);color:#000}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#1e293b;border-radius:3px}
 a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit}
 
-/* ===== GRAIN OVERLAY ===== */
+/* ===== GRAIN + SCANLINES ===== */
 body::before{
-  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:9999;opacity:.4
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.5;mix-blend-mode:overlay
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none;z-index:9998;opacity:.4
 }
 
-/* ===== GRID LINES BG ===== */
-.grid-bg{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background-image:
-    linear-gradient(rgba(34,211,238,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,211,238,.03) 1px, transparent 1px);
-  background-size:80px 80px;
-  pointer-events:none;z-index:0
+/* ===== CURSOR GLOW ===== */
+.cursor-glow{
+  position:fixed;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,211,238,.06) 0%,rgba(212,168,83,.03) 40%,transparent 70%);
+  pointer-events:none;z-index:0;transform:translate(-50%,-50%);
+  transition:opacity .4s;opacity:0
 }
+.cursor-glow.visible{opacity:1}
 
-/* ===== GLOW ORB ===== */
-.orb{
-  position:fixed;width:600px;height:600px;border-radius:50%;
-  background:radial-gradient(circle,rgba(34,211,238,.08) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
-  transition:transform .3s ease-out;
-  top:-200px;right:-200px;
-}
-.orb2{
-  position:fixed;width:500px;height:500px;border-radius:50%;
-  background:radial-gradient(circle,rgba(244,114,182,.05) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
-  bottom:-150px;left:-150px;
-}
+/* ===== CANVAS BG ===== */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ===== NAV ===== */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:1rem 2rem;
+  padding:.85rem var(--page-pad);
   display:flex;justify-content:space-between;align-items:center;
-  background:rgba(6,8,13,.7);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  transition:all .3s
+  background:transparent;backdrop-filter:blur(0px);
+  border-bottom:1px solid transparent;
+  transition:all .5s var(--ease-out-expo)
 }
-nav.scrolled{background:rgba(6,8,13,.95);padding:.7rem 2rem}
-.nav-logo{font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--green);letter-spacing:2px}
-.nav-logo span{color:var(--muted)}
-.nav-links{display:flex;gap:2rem}
-.nav-links a{font-size:.78rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;transition:color .2s;font-weight:500}
-.nav-links a:hover{color:var(--green)}
+nav.scrolled{
+  background:rgba(8,9,14,.85);backdrop-filter:blur(20px);
+  border-bottom-color:var(--border);padding:.6rem var(--page-pad)
+}
+.nav-logo{
+  font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:2px;cursor:pointer;
+  display:flex;align-items:center;gap:.6rem;
+  transition:transform .3s var(--ease-spring)
+}
+.nav-logo:hover{transform:scale(1.03)}
+.nav-logo .logo-film{color:var(--film-gold)}
+.nav-logo .logo-dot{color:var(--cyan)}
+.nav-logo .logo-dev{color:var(--text-dim)}
+.nav-center{display:flex;gap:1.8rem;align-items:center}
+.nav-center a{
+  font-size:.7rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;
+  font-weight:500;position:relative;padding:.4rem 0;
+  transition:color .3s,transform .3s var(--ease-spring)
+}
+.nav-center a::after{
+  content:'';position:absolute;bottom:0;left:50%;width:0;height:1.5px;
+  background:linear-gradient(90deg,var(--film-gold),var(--cyan));
+  transition:all .4s var(--ease-out-expo);transform:translateX(-50%)
+}
+.nav-center a:hover,.nav-center a.active{color:var(--text)}
+.nav-center a:hover::after,.nav-center a.active::after{width:100%}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.lang-toggle{
+  display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  transition:border-color .3s
+}
+.lang-toggle:hover{border-color:rgba(255,255,255,.12)}
+.lang-btn{
+  font-family:var(--mono);font-size:.6rem;padding:5px 12px;
+  border:none;background:transparent;color:var(--muted);
+  letter-spacing:.5px;transition:all .3s
+}
+.lang-btn.active{background:rgba(212,168,83,.12);color:var(--film-gold)}
+.lang-btn:hover:not(.active){color:var(--text-dim)}
+
+/* Mobile nav */
+.nav-hamburger{
+  display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;
+  background:none;border:none;position:relative;width:28px;height:28px;
+  align-items:center;justify-content:center
+}
+.nav-hamburger span{
+  width:18px;height:1.5px;background:var(--text-dim);transition:all .4s var(--ease-out-expo);
+  display:block;position:absolute
+}
+.nav-hamburger span:nth-child(1){transform:translateY(-5px)}
+.nav-hamburger span:nth-child(3){transform:translateY(5px)}
+.nav-hamburger.open span:nth-child(1){transform:rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.nav-hamburger.open span:nth-child(3){transform:rotate(-45deg)}
+
+.mobile-menu{
+  display:none;position:fixed;inset:0;
+  background:rgba(8,9,14,.97);z-index:99;
+  flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;
+  backdrop-filter:blur(30px);opacity:0;
+  transition:opacity .4s var(--ease-out-expo)
+}
+.mobile-menu.open{display:flex;opacity:1}
+.mobile-menu a{
+  font-size:1.1rem;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;
+  transition:color .3s,transform .3s var(--ease-spring);transform:translateY(10px);opacity:0
+}
+.mobile-menu.open a{transform:translateY(0);opacity:1}
+.mobile-menu a:nth-child(1){transition-delay:.05s}
+.mobile-menu a:nth-child(2){transition-delay:.1s}
+.mobile-menu a:nth-child(3){transition-delay:.15s}
+.mobile-menu a:nth-child(4){transition-delay:.2s}
+.mobile-menu a:nth-child(5){transition-delay:.25s}
+.mobile-menu a:nth-child(6){transition-delay:.3s}
+.mobile-menu a:hover{color:var(--film-gold)}
+
+/* ===== PAGE TRANSITION ===== */
+.page{display:none;min-height:100vh;position:relative;z-index:1}
+.page.active{display:block;animation:pageIn .6s var(--ease-out-expo)}
+@keyframes pageIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.page-content{padding-top:5rem}
 
 /* ===== HERO ===== */
 .hero{
   min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-  padding:0 clamp(2rem,8vw,8rem);position:relative;z-index:1
+  padding:0 var(--page-pad);position:relative;overflow:hidden
 }
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-vignette{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 50%,transparent 30%,rgba(8,9,14,.6) 70%,rgba(8,9,14,.95) 100%);
+  z-index:1
+}
+/* Film strip decoration */
+.film-strip{
+  position:absolute;right:-20px;top:0;bottom:0;width:60px;z-index:2;opacity:.06;
+  background:repeating-linear-gradient(
+    180deg,
+    transparent 0px,#fff 0px,#fff 4px,transparent 4px,transparent 8px,
+    #fff 8px,#fff 48px,transparent 48px,transparent 52px,
+    #fff 52px,#fff 56px,transparent 56px,transparent 60px
+  )
+}
+.film-strip-left{
+  position:absolute;left:-20px;top:0;bottom:0;width:60px;z-index:2;opacity:.04;
+  background:repeating-linear-gradient(
+    180deg,
+    transparent 0px,#fff 0px,#fff 4px,transparent 4px,transparent 8px,
+    #fff 8px,#fff 48px,transparent 48px,transparent 52px,
+    #fff 52px,#fff 56px,transparent 56px,transparent 60px
+  )
+}
+.hero-inner{position:relative;z-index:3;max-width:900px}
 .hero-tag{
-  font-family:var(--mono);font-size:.7rem;color:var(--green);letter-spacing:3px;
+  font-family:var(--mono);font-size:.68rem;letter-spacing:3px;
   text-transform:uppercase;margin-bottom:1.5rem;
-  opacity:0;animation:fadeUp .8s ease forwards;animation-delay:.2s
+  display:flex;align-items:center;gap:.8rem;
+  opacity:0;animation:fadeUp .8s var(--ease-out-expo) forwards .3s
 }
-.hero-tag::before{content:'> ';opacity:.5}
+.hero-tag .tag-film{color:var(--film-gold)}
+.hero-tag .tag-sep{color:var(--muted);opacity:.4}
+.hero-tag .tag-dev{color:var(--cyan)}
+.hero-tag .tag-build{color:var(--purple)}
 .hero h1{
-  font-size:clamp(3rem,8vw,6.5rem);font-weight:800;line-height:.95;
-  letter-spacing:-3px;margin-bottom:1.5rem;
-  opacity:0;animation:fadeUp .8s ease forwards;animation-delay:.4s
+  font-size:clamp(2.8rem,7.5vw,6.5rem);font-weight:800;line-height:.93;
+  letter-spacing:-2.5px;margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp .8s var(--ease-out-expo) forwards .5s
 }
-.hero h1 .line2{color:var(--muted);display:block}
-.hero h1 .highlight{
-  background:linear-gradient(135deg,var(--green),var(--blue));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
+.hero h1 .line2{display:block;margin-top:.15em}
+.hero h1 .gradient-warm{
+  background:linear-gradient(135deg,var(--film-gold),var(--warm),var(--amber));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
 }
+.hero h1 .gradient-cool{
+  background:linear-gradient(135deg,var(--cyan),var(--blue),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+}
+.hero h1 .text-dim{color:var(--muted)}
 .hero-desc{
-  font-size:1.05rem;color:var(--muted);max-width:520px;line-height:1.7;font-weight:300;
-  opacity:0;animation:fadeUp .8s ease forwards;animation-delay:.6s
+  font-size:1.05rem;color:var(--text-dim);max-width:540px;line-height:1.8;font-weight:300;
+  opacity:0;animation:fadeUp .8s var(--ease-out-expo) forwards .7s
 }
 .hero-desc strong{color:var(--text);font-weight:500}
-.hero-cta{
-  display:flex;gap:1rem;margin-top:2.5rem;flex-wrap:wrap;
-  opacity:0;animation:fadeUp .8s ease forwards;animation-delay:.8s
-}
-.btn{
-  padding:.75rem 1.8rem;border-radius:6px;font-family:var(--mono);font-size:.75rem;
-  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .25s;
-  display:inline-flex;align-items:center;gap:8px;font-weight:700;border:none;
-}
-.btn-primary{background:var(--green);color:#000}
-.btn-primary:hover{background:#fff;box-shadow:0 0 30px rgba(34,211,238,.3)}
-.btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.15)}
-.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.hero-desc .hl-film{color:var(--film-gold)}
+.hero-desc .hl-hw{color:var(--cyan)}
+.hero-desc .hl-ai{color:var(--purple)}
 
+/* Hero nav cards */
+.hero-cards{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:3.5rem;
+  opacity:0;animation:fadeUp .8s var(--ease-out-expo) forwards .9s
+}
+.hero-card{
+  background:rgba(18,22,31,.7);border:1px solid var(--border);border-radius:14px;
+  padding:1.4rem 1rem;cursor:pointer;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  position:relative;overflow:hidden;backdrop-filter:blur(10px);
+  transition:all .5s var(--ease-out-expo)
+}
+.hero-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .5s;border-radius:14px
+}
+.hero-card:nth-child(1)::before{background:radial-gradient(ellipse at center,rgba(212,168,83,.08),transparent 70%)}
+.hero-card:nth-child(2)::before{background:radial-gradient(ellipse at center,rgba(246,173,60,.08),transparent 70%)}
+.hero-card:nth-child(3)::before{background:radial-gradient(ellipse at center,rgba(34,211,238,.08),transparent 70%)}
+.hero-card:nth-child(4)::before{background:radial-gradient(ellipse at center,rgba(157,140,246,.08),transparent 70%)}
+.hero-card:nth-child(5)::before{background:radial-gradient(ellipse at center,rgba(91,156,246,.08),transparent 70%)}
+.hero-card:hover{transform:translateY(-6px) scale(1.02);border-color:var(--border-hover)}
+.hero-card:hover::before{opacity:1}
+/* Top accent line */
+.hero-card::after{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1.5px;opacity:0;
+  transition:all .5s var(--ease-out-expo)
+}
+.hero-card:hover::after{opacity:1;left:10%;right:10%}
+.hero-card:nth-child(1)::after{background:linear-gradient(90deg,transparent,var(--film-gold),transparent)}
+.hero-card:nth-child(2)::after{background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.hero-card:nth-child(3)::after{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.hero-card:nth-child(4)::after{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.hero-card:nth-child(5)::after{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.hero-card-icon{
+  font-size:1.5rem;line-height:1;
+  transition:transform .5s var(--ease-spring)
+}
+.hero-card:hover .hero-card-icon{transform:scale(1.15) translateY(-2px)}
+.hero-card-title{font-size:.78rem;font-weight:600;letter-spacing:.3px;transition:color .3s}
+.hero-card:nth-child(1):hover .hero-card-title{color:var(--film-gold)}
+.hero-card:nth-child(2):hover .hero-card-title{color:var(--amber)}
+.hero-card:nth-child(3):hover .hero-card-title{color:var(--cyan)}
+.hero-card:nth-child(4):hover .hero-card-title{color:var(--purple)}
+.hero-card:nth-child(5):hover .hero-card-title{color:var(--blue)}
+.hero-card-sub{font-family:var(--mono);font-size:.5rem;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase}
+
+/* Scroll indicator */
 .scroll-hint{
-  position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);
-  font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:2px;
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:8px;
-  opacity:0;animation:fadeUp .8s ease forwards;animation-delay:1.2s
+  opacity:0;animation:fadeUp .8s var(--ease-out-expo) forwards 1.3s
 }
-.scroll-arrow{
-  width:1px;height:30px;background:linear-gradient(to bottom,var(--muted),transparent);
-  animation:scrollPulse 2s ease infinite
+.scroll-line{width:1px;height:40px;position:relative;overflow:hidden}
+.scroll-line::after{
+  content:'';position:absolute;top:-40px;left:0;width:1px;height:40px;
+  background:linear-gradient(to bottom,transparent,var(--film-gold));
+  animation:scrollDown 2s ease infinite
 }
+@keyframes scrollDown{0%{top:-40px}100%{top:40px}}
+.scroll-text{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:3px}
 
-/* ===== ABOUT STRIP ===== */
-.about-strip{
-  padding:6rem clamp(2rem,8vw,8rem);position:relative;z-index:1;
-  border-top:1px solid var(--border);
+/* ===== SHARED SECTION STYLES ===== */
+.sec-pad{padding:5rem var(--page-pad)}
+.sec-header{margin-bottom:3rem}
+.sec-label{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:3px;
+  text-transform:uppercase;margin-bottom:.8rem;
+  display:flex;align-items:center;gap:.8rem
 }
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
-.about-label{
-  font-family:var(--mono);font-size:.65rem;color:var(--green);
-  letter-spacing:3px;text-transform:uppercase;margin-bottom:1.5rem;
-}
-.about-label::before{content:'// '}
-.about-text{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300}
-.about-text strong{color:var(--text);font-weight:500}
+.sec-label .label-line{width:30px;height:1px;background:linear-gradient(90deg,var(--film-gold),var(--cyan))}
+.sec-label .label-text-film{color:var(--film-gold)}
+.sec-label .label-text-dev{color:var(--cyan)}
+.sec-label .label-text{color:var(--text-dim)}
+.sec-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-1.5px}
+.sec-desc{font-size:.92rem;color:var(--text-dim);line-height:1.7;max-width:550px;margin-top:.6rem;font-weight:300}
 
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-.stat-card{
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:1.5rem;transition:all .3s;position:relative;overflow:hidden
+/* Breadcrumb */
+.breadcrumb{
+  font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:1px;
+  padding:1.5rem var(--page-pad) 0;margin-top:4rem;
+  display:flex;align-items:center;gap:.5rem
 }
-.stat-card:hover{border-color:rgba(34,211,238,.2);transform:translateY(-2px)}
-.stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--green),transparent);opacity:0;
-  transition:opacity .3s
-}
-.stat-card:hover::before{opacity:1}
-.stat-num{font-size:2rem;font-weight:800;color:var(--text);letter-spacing:-1px}
-.stat-num.c1{color:var(--green)}
-.stat-num.c2{color:var(--pink)}
-.stat-num.c3{color:var(--amber)}
-.stat-num.c4{color:var(--purple)}
-.stat-desc{font-size:.72rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)}
+.breadcrumb a{color:var(--cyan);transition:color .3s}
+.breadcrumb a:hover{color:var(--film-gold)}
+.breadcrumb .bc-sep{opacity:.3}
 
-/* ===== PROJECTS ===== */
-.projects{
-  padding:6rem clamp(2rem,8vw,8rem);position:relative;z-index:1;
-  border-top:1px solid var(--border);
+/* Back button */
+.back-btn{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.68rem;
+  color:var(--muted);letter-spacing:1px;cursor:pointer;
+  background:none;border:none;padding:0;margin-bottom:2rem;
+  transition:all .3s var(--ease-out-expo)
 }
-.section-header{
-  display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:1rem
-}
-.section-title{font-size:2.5rem;font-weight:700;letter-spacing:-1.5px}
-.section-subtitle{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.back-btn:hover{color:var(--cyan);gap:12px}
+.back-btn .arrow{transition:transform .3s var(--ease-out-expo)}
+.back-btn:hover .arrow{transform:translateX(-3px)}
 
-.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
-.project-card{
+/* Filter tabs */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.filter-btn{
+  font-family:var(--mono);font-size:.6rem;padding:7px 18px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  letter-spacing:.5px;transition:all .35s var(--ease-out-expo);cursor:pointer;
+  position:relative;overflow:hidden
+}
+.filter-btn::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .35s;border-radius:20px;
+  background:linear-gradient(135deg,rgba(212,168,83,.1),rgba(34,211,238,.1))
+}
+.filter-btn:hover::before,.filter-btn.active::before{opacity:1}
+.filter-btn:hover{border-color:var(--border-hover);color:var(--text-dim)}
+.filter-btn.active{border-color:rgba(212,168,83,.3);color:var(--film-gold)}
+
+/* ===== PRODUCTION PAGE ===== */
+.prod-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;
+}
+.prod-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;cursor:pointer;position:relative;
+  transition:all .5s var(--ease-out-expo)
+}
+.prod-card:hover{transform:translateY(-5px);border-color:var(--border-hover);box-shadow:0 20px 50px rgba(0,0,0,.4),0 0 0 1px rgba(212,168,83,.05)}
+.prod-card-img{
+  width:100%;aspect-ratio:16/10;background:var(--surface);position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center
+}
+.prod-card-img .placeholder{font-size:2.5rem;opacity:.2;transition:transform .6s var(--ease-out-expo)}
+.prod-card:hover .prod-card-img .placeholder{transform:scale(1.1)}
+.prod-card-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,9,14,.9) 0%,transparent 50%);
+}
+.prod-card-overlay{
+  position:absolute;bottom:.8rem;left:1rem;z-index:2;
+  font-family:var(--mono);font-size:.6rem;color:var(--film-gold);letter-spacing:1.5px;
+  opacity:0;transform:translateY(5px);
+  transition:all .4s var(--ease-out-expo)
+}
+.prod-card:hover .prod-card-overlay{opacity:1;transform:translateY(0)}
+.prod-card-body{padding:1.2rem 1.4rem}
+.prod-card-type{
+  font-family:var(--mono);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:.4rem;
+  background:linear-gradient(90deg,var(--film-gold),var(--amber));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+}
+.prod-card-title{font-size:1.05rem;font-weight:600;margin-bottom:.3rem;transition:color .3s}
+.prod-card:hover .prod-card-title{color:var(--film-gold)}
+.prod-card-role{font-size:.75rem;color:var(--muted);font-weight:300}
+
+/* Production detail */
+.prod-detail{max-width:900px}
+.prod-detail-hero{
+  width:100%;aspect-ratio:16/9;background:var(--card);border-radius:14px;overflow:hidden;
+  margin-bottom:2rem;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);position:relative
+}
+.prod-detail-hero .placeholder{font-size:4rem;opacity:.15}
+.prod-detail-meta{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.meta-tag{
+  font-family:var(--mono);font-size:.58rem;padding:5px 13px;border-radius:6px;
+  background:rgba(255,255,255,.03);color:var(--muted);border:1px solid var(--border);
+  letter-spacing:.5px;transition:all .3s
+}
+.meta-tag.role{color:var(--film-gold);border-color:rgba(212,168,83,.2);background:rgba(212,168,83,.06)}
+.meta-tag.type-tag{color:var(--cyan);border-color:rgba(34,211,238,.15);background:rgba(34,211,238,.04)}
+.prod-detail-desc{font-size:.95rem;color:var(--text-dim);line-height:1.8;font-weight:300;margin-bottom:2rem}
+.prod-detail-desc strong{color:var(--text);font-weight:500}
+.video-embed{
+  width:100%;aspect-ratio:16/9;background:var(--surface);border-radius:10px;
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  margin-bottom:2rem;font-family:var(--mono);font-size:.72rem;color:var(--muted);
+  position:relative;overflow:hidden
+}
+.video-embed::before{
+  content:'▶';position:absolute;font-size:2rem;color:var(--film-gold);opacity:.3;
+  transition:all .4s var(--ease-spring)
+}
+.video-embed:hover::before{opacity:.6;transform:scale(1.1)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem;margin-bottom:2rem}
+.gallery-item{
+  aspect-ratio:3/2;background:var(--surface);border-radius:8px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;opacity:.2;
+  overflow:hidden;transition:all .4s var(--ease-out-expo)
+}
+.gallery-item:hover{opacity:.35;transform:scale(1.02)}
+.prod-bio{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:2rem;margin-top:3rem;position:relative;overflow:hidden
+}
+.prod-bio::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--film-gold),transparent);opacity:.3
+}
+.prod-bio-title{font-family:var(--mono);font-size:.6rem;color:var(--film-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
+.prod-bio-text{font-size:.88rem;color:var(--text-dim);line-height:1.7;font-weight:300}
+.prod-bio-text strong{color:var(--text);font-weight:500}
+
+/* ===== GEAR PAGE ===== */
+.gear-categories{display:flex;flex-direction:column;gap:2.5rem}
+.gear-category-title{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:2.5px;
+  text-transform:uppercase;margin-bottom:1.2rem;padding-bottom:.6rem;
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;
+  color:var(--film-gold)
+}
+.gear-category-title .cat-count{
+  font-size:.55rem;color:var(--muted);background:rgba(255,255,255,.04);
+  padding:2px 8px;border-radius:10px;margin-left:auto
+}
+.gear-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.gear-card{
   background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:2rem;transition:all .35s ease;position:relative;overflow:hidden;
-  display:flex;flex-direction:column;cursor:pointer
+  padding:1.3rem;display:flex;gap:1rem;align-items:start;
+  transition:all .4s var(--ease-out-expo);position:relative;overflow:hidden
 }
-.project-card:hover{border-color:rgba(34,211,238,.25);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.project-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  transition:opacity .3s;opacity:0
+.gear-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:0 12px 35px rgba(0,0,0,.3)}
+.gear-card-img{
+  width:65px;height:65px;border-radius:10px;background:var(--surface);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  border:1px solid var(--border);transition:all .4s var(--ease-spring)
 }
-.project-card:hover::after{opacity:1}
-.project-card.card-green::after{background:linear-gradient(90deg,var(--green2),var(--green))}
-.project-card.card-pink::after{background:linear-gradient(90deg,var(--pink),var(--purple))}
-.project-card.card-amber::after{background:linear-gradient(90deg,var(--amber),#f97316)}
-.project-card.card-blue::after{background:linear-gradient(90deg,var(--blue),var(--purple))}
-.project-card.card-purple::after{background:linear-gradient(90deg,var(--purple),var(--pink))}
+.gear-card:hover .gear-card-img{transform:scale(1.05);border-color:rgba(212,168,83,.2)}
+.gear-card-info{flex:1;min-width:0}
+.gear-card-name{font-size:.88rem;font-weight:600;margin-bottom:.2rem}
+.gear-card-spec{font-size:.7rem;color:var(--muted);font-weight:300;margin-bottom:.5rem;line-height:1.5}
+.gear-card-price{
+  font-family:var(--mono);font-size:.78rem;font-weight:700;
+  background:linear-gradient(90deg,var(--film-gold),var(--amber));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+}
 
-.pcard-icon{
-  width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:1.2rem;font-weight:700;margin-bottom:1.2rem;font-family:var(--mono);
+/* Search */
+.search-box{
+  display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.55rem 1rem;
+  max-width:380px;transition:all .4s var(--ease-out-expo)
 }
-.pcard-icon.ig{background:rgba(62,207,142,.1);color:var(--green2)}
-.pcard-icon.ip{background:rgba(244,114,182,.1);color:var(--pink)}
-.pcard-icon.ia{background:rgba(251,191,36,.1);color:var(--amber)}
-.pcard-icon.ib{background:rgba(96,165,250,.1);color:var(--blue)}
-.pcard-icon.ipu{background:rgba(167,139,250,.1);color:var(--purple)}
+.search-box:focus-within{border-color:rgba(212,168,83,.3);box-shadow:0 0 20px rgba(212,168,83,.05)}
+.search-box input{flex:1;background:none;border:none;color:var(--text);font-size:.82rem;outline:none}
+.search-box input::placeholder{color:var(--muted)}
+.search-icon{color:var(--muted);font-size:.8rem}
 
-.pcard-title{font-size:1.15rem;font-weight:600;margin-bottom:.5rem}
-.pcard-desc{font-size:.82rem;color:var(--muted);line-height:1.6;flex:1;margin-bottom:1.2rem;font-weight:300}
-.pcard-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
-.pcard-tag{
-  font-family:var(--mono);font-size:.6rem;padding:3px 10px;border-radius:4px;
-  background:rgba(255,255,255,.04);color:var(--muted);border:1px solid rgba(255,255,255,.06);
-  letter-spacing:.5px
+/* Inquiry form */
+.inquiry-form{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:2rem;max-width:600px;margin-top:3rem;position:relative;overflow:hidden
 }
-.pcard-link{
-  font-family:var(--mono);font-size:.7rem;color:var(--green);letter-spacing:1px;
-  display:flex;align-items:center;gap:6px;transition:gap .2s
+.inquiry-form::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--film-gold),var(--cyan),transparent);opacity:.3
 }
-.project-card:hover .pcard-link{gap:10px}
+.inquiry-form h3{font-size:1.05rem;font-weight:600;margin-bottom:.3rem}
+.inquiry-form>p{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;font-weight:300}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.4rem}
+.form-row input,.form-row textarea,.form-row select{
+  width:100%;padding:.65rem 1rem;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.82rem;outline:none;
+  transition:all .35s var(--ease-out-expo)
+}
+.form-row input:focus,.form-row textarea:focus{border-color:rgba(212,168,83,.3);box-shadow:0 0 15px rgba(212,168,83,.05)}
+.form-row textarea{min-height:90px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-submit{
+  padding:.7rem 2rem;border-radius:8px;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  background:linear-gradient(135deg,var(--film-gold),var(--amber));color:#000;
+  border:none;font-weight:700;margin-top:.5rem;
+  transition:all .4s var(--ease-out-expo);position:relative;overflow:hidden
+}
+.form-submit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  opacity:0;transition:opacity .4s
+}
+.form-submit:hover::before{opacity:1}
+.form-submit:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(34,211,238,.2)}
+.form-submit span{position:relative;z-index:1}
 
-.pcard-status{
-  position:absolute;top:1.5rem;right:1.5rem;font-family:var(--mono);font-size:.55rem;
-  padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;font-weight:700
+/* ===== DEV PAGE ===== */
+.dev-toggle{
+  display:flex;gap:0;margin-bottom:2.5rem;border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;width:fit-content;
+  background:var(--surface)
 }
-.status-live{background:rgba(62,207,142,.12);color:var(--green2)}
-.status-wip{background:rgba(251,191,36,.12);color:var(--amber)}
-.status-soon{background:rgba(100,116,139,.15);color:var(--muted)}
+.dev-toggle-btn{
+  font-family:var(--mono);font-size:.65rem;padding:.65rem 1.5rem;
+  background:transparent;color:var(--muted);border:none;letter-spacing:1px;
+  cursor:pointer;transition:all .35s var(--ease-out-expo);position:relative
+}
+.dev-toggle-btn.active{color:var(--cyan);background:rgba(34,211,238,.08)}
+.dev-toggle-btn:not(:last-child){border-right:1px solid var(--border)}
+.dev-toggle-btn:hover:not(.active){color:var(--text-dim);background:rgba(255,255,255,.02)}
 
-/* ===== TOOLKIT ===== */
-.toolkit{
-  padding:6rem clamp(2rem,8vw,8rem);position:relative;z-index:1;
-  border-top:1px solid var(--border);
+.dev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.2rem}
+.dev-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.8rem;cursor:pointer;position:relative;overflow:hidden;
+  transition:all .5s var(--ease-out-expo)
 }
-.tools-wrap{display:flex;gap:3rem;overflow:hidden;position:relative}
-.tools-track{
-  display:flex;gap:2rem;
-  animation:scroll 30s linear infinite;
+.dev-card:hover{transform:translateY(-4px);border-color:var(--border-hover);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.dev-card::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1px;opacity:0;
+  transition:all .5s var(--ease-out-expo)
 }
-.tool-pill{
-  flex-shrink:0;padding:.6rem 1.5rem;border-radius:20px;
-  border:1px solid var(--border);font-family:var(--mono);font-size:.7rem;
-  color:var(--muted);white-space:nowrap;transition:all .2s;letter-spacing:.5px
+.dev-card:hover::before{opacity:1;left:5%;right:5%}
+.dev-card.hw::before{background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.dev-card.sw::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.dev-card-icon{
+  width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;margin-bottom:1rem;transition:transform .4s var(--ease-spring)
 }
-.tool-pill:hover{border-color:var(--green);color:var(--green)}
+.dev-card:hover .dev-card-icon{transform:scale(1.1) rotate(-3deg)}
+.dev-card.hw .dev-card-icon{background:rgba(246,173,60,.08);border:1px solid rgba(246,173,60,.1)}
+.dev-card.sw .dev-card-icon{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.08)}
+.dev-card-title{font-size:1.02rem;font-weight:600;margin-bottom:.4rem;transition:color .3s}
+.dev-card.hw:hover .dev-card-title{color:var(--amber)}
+.dev-card.sw:hover .dev-card-title{color:var(--cyan)}
+.dev-card-desc{font-size:.78rem;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:1rem}
+.dev-card-stack{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem}
+.dev-card-stack span{
+  font-family:var(--mono);font-size:.52rem;padding:3px 8px;border-radius:4px;
+  background:rgba(255,255,255,.03);color:var(--text-dim);border:1px solid rgba(255,255,255,.05);
+  transition:all .3s
+}
+.dev-card:hover .dev-card-stack span{border-color:rgba(255,255,255,.08)}
+.dev-card-links{display:flex;gap:1rem}
+.dev-card-links a{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.5px;
+  transition:all .3s var(--ease-out-expo);display:flex;align-items:center;gap:5px
+}
+.dev-card.hw .dev-card-links a{color:var(--amber)}
+.dev-card.sw .dev-card-links a{color:var(--cyan)}
+.dev-card-links a:hover{opacity:.7;gap:8px}
 
-/* ===== TERMINAL ===== */
-.terminal-section{
-  padding:6rem clamp(2rem,8vw,8rem);position:relative;z-index:1;
-  border-top:1px solid var(--border);
+/* Case study */
+.case-study{max-width:800px}
+.case-section{margin-bottom:2.5rem}
+.case-section-title{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:2.5px;
+  text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem
 }
-.terminal{
-  background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:12px;
-  overflow:hidden;max-width:700px;
+.case-section-title .cs-line{width:20px;height:1px;background:var(--cyan)}
+.case-section-title .cs-text{color:var(--cyan)}
+.case-text{font-size:.9rem;color:var(--text-dim);line-height:1.8;font-weight:300}
+.case-text strong{color:var(--text);font-weight:500}
+.case-stack-list{display:flex;gap:.5rem;flex-wrap:wrap}
+.case-stack-item{
+  font-family:var(--mono);font-size:.68rem;padding:6px 14px;border-radius:8px;
+  background:rgba(255,255,255,.03);color:var(--text);border:1px solid var(--border);
+  transition:all .3s
 }
-.terminal-bar{
-  background:#161b22;padding:10px 16px;display:flex;align-items:center;gap:8px;
-  border-bottom:1px solid rgba(255,255,255,.06)
+.case-stack-item:hover{border-color:var(--border-hover);transform:translateY(-1px)}
+.case-result{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1.5rem;margin-top:1rem;position:relative;overflow:hidden
 }
-.terminal-dot{width:10px;height:10px;border-radius:50%}
-.terminal-dot.r{background:#ff5f57}.terminal-dot.y{background:#febc2e}.terminal-dot.g{background:#28c840}
-.terminal-title{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-left:auto}
-.terminal-body{padding:1.5rem;font-family:var(--mono);font-size:.78rem;line-height:2}
-.t-prompt{color:var(--green)}
-.t-cmd{color:var(--text)}
-.t-output{color:var(--muted)}
-.t-cursor{
-  display:inline-block;width:8px;height:14px;background:var(--green);
-  vertical-align:middle;margin-left:2px;
-  animation:blink 1s step-end infinite
+.case-result::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--cyan),var(--purple))
 }
+.case-result p{font-size:.85rem;color:var(--text-dim);line-height:1.7;font-weight:300}
+
+/* ===== ABOUT PAGE ===== */
+.about-hero{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;margin-bottom:4rem}
+.about-photo{
+  width:100%;aspect-ratio:3/4;background:var(--card);border-radius:16px;
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:3rem;opacity:.2;position:relative;overflow:hidden
+}
+.about-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 60%,rgba(8,9,14,.8) 100%)
+}
+.about-story{font-size:.95rem;color:var(--text-dim);line-height:1.9;font-weight:300}
+.about-story strong{color:var(--text);font-weight:500}
+
+/* Timeline */
+.timeline{position:relative;padding-left:2.5rem;margin-bottom:4rem}
+.timeline::before{
+  content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,var(--film-gold),var(--cyan),var(--purple),transparent)
+}
+.timeline-item{position:relative;margin-bottom:2.2rem;padding-left:1.5rem}
+.timeline-item::before{
+  content:'';position:absolute;left:-2.5rem;top:7px;width:14px;height:14px;
+  border-radius:50%;border:2px solid var(--muted);background:var(--bg);
+  transition:all .4s var(--ease-spring)
+}
+.timeline-item:hover::before{transform:scale(1.2);border-color:var(--film-gold)}
+.timeline-item.active::before{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px rgba(34,211,238,.3)}
+.timeline-year{font-family:var(--mono);font-size:.6rem;color:var(--film-gold);letter-spacing:1.5px;margin-bottom:.3rem}
+.timeline-title{font-size:1rem;font-weight:600;margin-bottom:.2rem}
+.timeline-desc{font-size:.8rem;color:var(--muted);line-height:1.6;font-weight:300}
+
+/* Resume buttons */
+.resume-section{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.resume-btn{
+  padding:.7rem 1.5rem;border-radius:10px;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.5px;display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border);background:var(--card);color:var(--text);
+  transition:all .4s var(--ease-out-expo)
+}
+.resume-btn:hover{border-color:var(--film-gold);color:var(--film-gold);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
+
+/* Contact */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.contact-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1.3rem;text-align:center;
+  transition:all .4s var(--ease-out-expo)
+}
+.contact-card:hover{border-color:var(--border-hover);transform:translateY(-3px)}
+.contact-card-icon{font-size:1.2rem;margin-bottom:.5rem}
+.contact-card-label{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem}
+.contact-card-value{font-size:.82rem;font-weight:500}
+.contact-card a{color:var(--cyan);transition:color .3s}
+.contact-card a:hover{color:var(--film-gold)}
+
+/* ===== BLOG PAGE ===== */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem}
+.blog-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.8rem;cursor:pointer;position:relative;overflow:hidden;
+  transition:all .5s var(--ease-out-expo)
+}
+.blog-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.blog-card::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1px;opacity:0;
+  transition:all .5s var(--ease-out-expo)
+}
+.blog-card:hover::before{opacity:1;left:5%;right:5%}
+.blog-card[data-tag="film"]::before{background:linear-gradient(90deg,transparent,var(--film-gold),transparent)}
+.blog-card[data-tag="tech"]::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.blog-card[data-tag="life"]::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.blog-card-date{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:1.5px;margin-bottom:.6rem}
+.blog-card-title{font-size:1.05rem;font-weight:600;margin-bottom:.5rem;line-height:1.4;transition:color .3s}
+.blog-card[data-tag="film"]:hover .blog-card-title{color:var(--film-gold)}
+.blog-card[data-tag="tech"]:hover .blog-card-title{color:var(--cyan)}
+.blog-card[data-tag="life"]:hover .blog-card-title{color:var(--purple)}
+.blog-card-excerpt{font-size:.8rem;color:var(--muted);line-height:1.6;font-weight:300;margin-bottom:1rem}
+.blog-card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.8rem}
+.blog-card-tag{
+  font-family:var(--mono);font-size:.52rem;padding:3px 9px;border-radius:4px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)
+}
+.blog-card-tag.film{color:var(--film-gold);border-color:rgba(212,168,83,.15)}
+.blog-card-tag.tech{color:var(--cyan);border-color:rgba(34,211,238,.15)}
+.blog-card-tag.life{color:var(--purple);border-color:rgba(157,140,246,.15)}
+.blog-card-link{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.5px;display:flex;align-items:center;gap:6px;transition:all .3s}
+.blog-card:hover .blog-card-link{gap:10px}
+.blog-card-crosslink{
+  font-family:var(--mono);font-size:.55rem;color:var(--blue);margin-top:.5rem;
+  display:flex;align-items:center;gap:5px
+}
+
+/* Blog detail */
+.blog-detail{max-width:720px}
+.blog-detail-title{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;letter-spacing:-1px;margin-bottom:1rem}
+.blog-detail-meta{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:2rem;align-items:center}
+.blog-detail-body{font-size:.92rem;color:var(--text-dim);line-height:1.9;font-weight:300}
+.blog-detail-body h2{color:var(--text);font-size:1.25rem;font-weight:600;margin:2rem 0 .8rem;letter-spacing:-.5px}
+.blog-detail-body h3{color:var(--text);font-size:1.02rem;font-weight:600;margin:1.5rem 0 .6rem}
+.blog-detail-body p{margin-bottom:.8rem}
+.blog-detail-body strong{color:var(--text);font-weight:500}
+.blog-detail-body code{
+  font-family:var(--mono);font-size:.8rem;background:rgba(34,211,238,.06);
+  padding:2px 7px;border-radius:4px;color:var(--cyan)
+}
+.blog-detail-body pre{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:1.2rem;margin:1rem 0;overflow-x:auto
+}
+.blog-detail-body pre code{background:none;padding:0;font-size:.75rem;line-height:1.7}
 
 /* ===== FOOTER ===== */
 footer{
-  padding:3rem clamp(2rem,8vw,8rem);border-top:1px solid var(--border);
+  padding:2.5rem var(--page-pad);border-top:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
   position:relative;z-index:1
 }
-.footer-left{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px}
+footer::before{
+  content:'';position:absolute;top:0;left:var(--page-pad);right:var(--page-pad);height:1px;
+  background:linear-gradient(90deg,transparent,var(--film-gold),var(--cyan),transparent);opacity:.15
+}
+.footer-left{font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:1px}
 .footer-links{display:flex;gap:1.5rem}
-.footer-links a{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;transition:color .2s}
-.footer-links a:hover{color:var(--green)}
+.footer-links a{
+  font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:1px;
+  cursor:pointer;transition:all .3s
+}
+.footer-links a:hover{color:var(--film-gold)}
 
 /* ===== ANIMATIONS ===== */
-@keyframes fadeUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-@keyframes scrollPulse{0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.3)}}
-@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-
-.reveal{opacity:0;transform:translateY(30px);transition:all .7s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(25px);transition:all .7s var(--ease-out-expo)}
 .reveal.visible{opacity:1;transform:translateY(0)}
+.stagger-1{transition-delay:.05s}.stagger-2{transition-delay:.1s}.stagger-3{transition-delay:.15s}
+.stagger-4{transition-delay:.2s}.stagger-5{transition-delay:.25s}.stagger-6{transition-delay:.3s}
+
+/* Magnetic hover class */
+.magnetic{transition:transform .3s var(--ease-out-expo)}
+
+/* i18n */
+[data-lang="zh"] .en-only{display:none!important}
+[data-lang="en"] .zh-only{display:none!important}
 
 /* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .hero-cards{grid-template-columns:repeat(3,1fr)}
+  .about-hero{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .film-strip,.film-strip-left{display:none}
+}
 @media(max-width:768px){
-  .about-grid{grid-template-columns:1fr}
-  .project-grid{grid-template-columns:1fr}
-  .nav-links{display:none}
+  .nav-center{display:none}
+  .nav-hamburger{display:flex}
   .hero h1{letter-spacing:-1.5px}
-  .stats-grid{grid-template-columns:1fr 1fr}
-  .section-title{font-size:2rem}
+  .hero-cards{grid-template-columns:repeat(2,1fr)}
+  .hero-card:last-child{grid-column:span 2}
+  .prod-grid,.dev-grid,.blog-grid,.gear-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .hero-cards{grid-template-columns:1fr}
+  .hero-card:last-child{grid-column:auto}
+  .contact-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-<div class="orb"></div>
-<div class="orb2"></div>
 
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- Particle canvas -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ===== NAV ===== -->
 <nav id="nav">
-  <div class="nav-logo">RICK<span>.DEV</span></div>
-  <div class="nav-links">
-    <a href="#about">About</a>
-    <a href="#projects">Projects</a>
-    <a href="#tools">Stack</a>
-    <a href="#contact">Contact</a>
+  <div class="nav-logo magnetic" onclick="navigate('home')">
+    <span class="logo-film">RICK</span><span class="logo-dot">.</span><span class="logo-dev">DEV</span>
+  </div>
+  <div class="nav-center">
+    <a href="#" onclick="navigate('production');return false" data-page="production">
+      <span class="en-only">Production</span><span class="zh-only">影视制片</span>
+    </a>
+    <a href="#" onclick="navigate('gear');return false" data-page="gear">
+      <span class="en-only">Gear</span><span class="zh-only">器材租赁</span>
+    </a>
+    <a href="#" onclick="navigate('dev');return false" data-page="dev">
+      <span class="en-only">Dev</span><span class="zh-only">开发</span>
+    </a>
+    <a href="#" onclick="navigate('about');return false" data-page="about">
+      <span class="en-only">About</span><span class="zh-only">关于我</span>
+    </a>
+    <a href="#" onclick="navigate('blog');return false" data-page="blog">
+      <span class="en-only">Blog</span><span class="zh-only">博客</span>
+    </a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="langEn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="langZh" onclick="setLang('zh')">中文</button>
+    </div>
+    <button class="nav-hamburger" id="hamburger" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero" id="home">
-  <div class="hero-tag">Film Producer / Hardware Hacker / AI Builder</div>
-  <h1>
-    I build things<br>
-    <span class="line2">that <span class="highlight">bridge worlds.</span></span>
-  </h1>
-  <p class="hero-desc">
-    From <strong>film sets</strong> to <strong>circuit boards</strong> to <strong>AI pipelines</strong> —
-    I sit at the intersection of creative production and technical craft.
-    Currently exploring ESP32, AI-driven manga production, and everything in between.
-  </p>
-  <div class="hero-cta">
-    <a href="#projects" class="btn btn-primary">View Projects &darr;</a>
-    <a href="https://github.com/YOURUSERNAME" class="btn btn-ghost" target="_blank">GitHub &nearr;</a>
-  </div>
-  <div class="scroll-hint">
-    SCROLL
-    <div class="scroll-arrow"></div>
-  </div>
-</section>
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="navigate('home');toggleMobile();return false">Home</a>
+  <a href="#" onclick="navigate('production');toggleMobile();return false">Production</a>
+  <a href="#" onclick="navigate('gear');toggleMobile();return false">Gear</a>
+  <a href="#" onclick="navigate('dev');toggleMobile();return false">Dev</a>
+  <a href="#" onclick="navigate('about');toggleMobile();return false">About</a>
+  <a href="#" onclick="navigate('blog');toggleMobile();return false">Blog</a>
+</div>
 
-<!-- ABOUT -->
-<section class="about-strip" id="about">
-  <div class="about-grid">
-    <div>
-      <div class="about-label">About</div>
-      <p class="about-text">
-        I'm Rick — a <strong>film & media producer</strong> turned <strong>hardware hacker</strong> and <strong>AI toolmaker</strong>.
-        By day I manage productions and study Drucker-based management at CIAM.
-        By night I wire up ESP32 boards, build AI comic pipelines, and automate everything I can touch.<br><br>
-        I believe the most interesting work happens when you <strong>refuse to pick a lane</strong> — when film production thinking meets embedded systems meets generative AI.
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-vignette"></div>
+    <div class="film-strip"></div>
+    <div class="film-strip-left"></div>
+    <div class="hero-inner">
+      <div class="hero-tag">
+        <span class="en-only">
+          <span class="tag-film">Film Producer</span>
+          <span class="tag-sep">/</span>
+          <span class="tag-dev">Hardware Hacker</span>
+          <span class="tag-sep">/</span>
+          <span class="tag-build">AI Builder</span>
+        </span>
+        <span class="zh-only">
+          <span class="tag-film">影视制片人</span>
+          <span class="tag-sep">/</span>
+          <span class="tag-dev">硬件极客</span>
+          <span class="tag-sep">/</span>
+          <span class="tag-build">AI 构建者</span>
+        </span>
+      </div>
+      <h1>
+        <span class="en-only">
+          I build things<br>
+          <span class="line2"><span class="text-dim">that </span><span class="gradient-warm">bridge</span> <span class="gradient-cool">worlds.</span></span>
+        </span>
+        <span class="zh-only">
+          构建连接<br>
+          <span class="line2"><span class="gradient-warm">不同世界</span><span class="text-dim">的东西</span></span>
+        </span>
+      </h1>
+      <p class="hero-desc">
+        <span class="en-only">
+          From <strong class="hl-film">film sets</strong> to <strong class="hl-hw">circuit boards</strong> to <strong class="hl-ai">AI pipelines</strong> —
+          I sit at the intersection of creative production and technical craft.
+        </span>
+        <span class="zh-only">
+          从<strong class="hl-film">片场</strong>到<strong class="hl-hw">电路板</strong>到 <strong class="hl-ai">AI 流水线</strong>——
+          我在创意制作与技术工艺的交汇处，做最有趣的事情。
+        </span>
       </p>
-    </div>
-    <div>
-      <div class="about-label">By the numbers</div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-num c1">10+</div>
-          <div class="stat-desc">Hardware Projects</div>
+      <div class="hero-cards">
+        <div class="hero-card magnetic" onclick="navigate('production')">
+          <div class="hero-card-icon">🎬</div>
+          <div class="hero-card-title"><span class="en-only">Production</span><span class="zh-only">影视制片</span></div>
+          <div class="hero-card-sub"><span class="en-only">Film & Media</span><span class="zh-only">短剧 · 短片 · 广告</span></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-num c2">20+</div>
-          <div class="stat-desc">Crew Managed</div>
+        <div class="hero-card magnetic" onclick="navigate('gear')">
+          <div class="hero-card-icon">📷</div>
+          <div class="hero-card-title"><span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span></div>
+          <div class="hero-card-sub"><span class="en-only">Camera · Light · Grip</span><span class="zh-only">摄影机 · 灯光 · Grip</span></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-num c3">3</div>
-          <div class="stat-desc">Parallel Tracks</div>
+        <div class="hero-card magnetic" onclick="navigate('dev')">
+          <div class="hero-card-icon">⚡</div>
+          <div class="hero-card-title"><span class="en-only">Dev Lab</span><span class="zh-only">开发实验室</span></div>
+          <div class="hero-card-sub"><span class="en-only">Hardware · Software</span><span class="zh-only">硬件 · 软件 · AI</span></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-num c4">&infin;</div>
-          <div class="stat-desc">Curiosity Level</div>
+        <div class="hero-card magnetic" onclick="navigate('about')">
+          <div class="hero-card-icon">👤</div>
+          <div class="hero-card-title"><span class="en-only">About Me</span><span class="zh-only">关于我</span></div>
+          <div class="hero-card-sub"><span class="en-only">Story · Resume</span><span class="zh-only">故事 · 简历</span></div>
+        </div>
+        <div class="hero-card magnetic" onclick="navigate('blog')">
+          <div class="hero-card-icon">✍️</div>
+          <div class="hero-card-title"><span class="en-only">Blog</span><span class="zh-only">博客</span></div>
+          <div class="hero-card-sub"><span class="en-only">Notes · Thoughts</span><span class="zh-only">笔记 · 思考</span></div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- PROJECTS -->
-<section class="projects" id="projects">
-  <div class="section-header">
-    <div>
-      <div class="section-subtitle">// what i'm building</div>
-      <div class="section-title">Projects & Learning</div>
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      <div class="scroll-text">SCROLL</div>
     </div>
-  </div>
-  <div class="project-grid">
+  </section>
+</div>
 
-    <a href="shell30days.html" class="project-card card-green">
-      <span class="pcard-status status-live">LIVE</span>
-      <div class="pcard-icon ig">$_</div>
-      <div class="pcard-title">Shell 30-Day Mastery</div>
-      <div class="pcard-desc">Systematic Shell/Bash learning system — from basic commands to production scripts, with interactive progress tracking.</div>
-      <div class="pcard-tags">
-        <span class="pcard-tag">bash</span><span class="pcard-tag">linux</span><span class="pcard-tag">automation</span><span class="pcard-tag">30 days</span>
+<!-- ===== PAGE: PRODUCTION ===== -->
+<div class="page" id="page-production">
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('home');return false">Home</a>
+      <span class="bc-sep">/</span>
+      <span class="en-only">Production</span><span class="zh-only">影视制片</span>
+    </div>
+    <div class="sec-pad" id="prod-list-view">
+      <div class="sec-header">
+        <div class="sec-label">
+          <span class="label-line"></span>
+          <span class="label-text-film"><span class="en-only">Film & Media</span><span class="zh-only">影视作品</span></span>
+        </div>
+        <div class="sec-title"><span class="en-only">Production</span><span class="zh-only">影视制片</span></div>
+        <div class="sec-desc">
+          <span class="en-only">Short dramas, short films, and commercial projects I've produced and managed.</span>
+          <span class="zh-only">我参与制片和管理的短剧、短片与商业项目。</span>
+        </div>
       </div>
-      <div class="pcard-link">Enter Course &rarr;</div>
-    </a>
-
-    <a href="python30days.html" class="project-card card-blue">
-      <span class="pcard-status status-live">LIVE</span>
-      <div class="pcard-icon ib">Py</div>
-      <div class="pcard-title">Python 30-Day Bootcamp</div>
-      <div class="pcard-desc">Complete Python curriculum from variables to AI API calls — tailored for hardware projects and creative automation.</div>
-      <div class="pcard-tags">
-        <span class="pcard-tag">python</span><span class="pcard-tag">esp32</span><span class="pcard-tag">api</span><span class="pcard-tag">30 days</span>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterProd('all',this)"><span class="en-only">All</span><span class="zh-only">全部</span></button>
+        <button class="filter-btn" onclick="filterProd('drama',this)"><span class="en-only">Short Drama</span><span class="zh-only">短剧</span></button>
+        <button class="filter-btn" onclick="filterProd('film',this)"><span class="en-only">Short Film</span><span class="zh-only">短片</span></button>
+        <button class="filter-btn" onclick="filterProd('commercial',this)"><span class="en-only">Commercial</span><span class="zh-only">广告</span></button>
       </div>
-      <div class="pcard-link">Enter Course &rarr;</div>
-    </a>
-
-    <div class="project-card card-pink">
-      <span class="pcard-status status-wip">WIP</span>
-      <div class="pcard-icon ip">漫</div>
-      <div class="pcard-title">AI Manga Pipeline</div>
-      <div class="pcard-desc">Multi-agent production pipeline for vertical short-drama manga — ComfyUI + FLUX.1 + CrewAI orchestration for 《地母七重奏》.</div>
-      <div class="pcard-tags">
-        <span class="pcard-tag">comfyui</span><span class="pcard-tag">flux</span><span class="pcard-tag">crewai</span><span class="pcard-tag">douyin</span>
+      <div class="prod-grid" id="prodGrid"></div>
+      <div class="prod-bio">
+        <div class="prod-bio-title"><span class="en-only">About the Producer</span><span class="zh-only">制片人简介</span></div>
+        <div class="prod-bio-text">
+          <span class="en-only">Rick is a <strong>film & media producer</strong> with experience managing productions from pre-production through post. Specializing in short-form content, he brings a unique perspective that combines creative vision with technical execution. Currently studying management at <strong>CIAM</strong>.</span>
+          <span class="zh-only">Rick 是一名<strong>影视制片人</strong>，具有从前期策划到后期制作的全流程管理经验。专注于短视频内容制作，将创意视野与技术执行力相结合。目前就读于 <strong>CIAM</strong> 管理学专业。</span>
+          <br><br>
+          <a href="#" onclick="navigate('about');return false" style="color:var(--film-gold);font-family:var(--mono);font-size:.72rem;letter-spacing:1px">
+            <span class="en-only">Contact me →</span><span class="zh-only">联系我 →</span>
+          </a>
+        </div>
       </div>
-      <div class="pcard-link">Coming Soon</div>
     </div>
+    <div class="sec-pad" id="prod-detail-view" style="display:none">
+      <button class="back-btn" onclick="showProdList()"><span class="arrow">←</span> <span class="en-only">Back to all projects</span><span class="zh-only">返回全部项目</span></button>
+      <div class="prod-detail" id="prodDetail"></div>
+    </div>
+  </div>
+</div>
 
-    <div class="project-card card-amber">
-      <span class="pcard-status status-wip">WIP</span>
-      <div class="pcard-icon ia">&#9881;</div>
-      <div class="pcard-title">ESP32 Hardware Lab</div>
-      <div class="pcard-desc">Collection of IoT builds — servo light switches, gyro game controllers, NFC multi-card devices, AI desktop pets, and more.</div>
-      <div class="pcard-tags">
-        <span class="pcard-tag">esp32</span><span class="pcard-tag">arduino</span><span class="pcard-tag">home-assistant</span><span class="pcard-tag">mqtt</span>
+<!-- ===== PAGE: GEAR ===== -->
+<div class="page" id="page-gear">
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
+      <span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span>
+    </div>
+    <div class="sec-pad">
+      <div class="sec-header">
+        <div class="sec-label"><span class="label-line"></span><span class="label-text-film"><span class="en-only">Equipment</span><span class="zh-only">器材</span></span></div>
+        <div class="sec-title"><span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span></div>
+        <div class="sec-desc">
+          <span class="en-only">Professional film and video equipment available for rent.</span>
+          <span class="zh-only">专业影视器材租赁服务，欢迎咨询档期和价格。</span>
+        </div>
       </div>
-      <div class="pcard-link">Coming Soon</div>
-    </div>
-
-    <div class="project-card card-purple">
-      <span class="pcard-status status-soon">NEXT</span>
-      <div class="pcard-icon ipu">&#10697;</div>
-      <div class="pcard-title">Robotics Roadmap</div>
-      <div class="pcard-desc">From servo control to kinematics to ROS2 — building toward autonomous mechanical arms and computer vision integration.</div>
-      <div class="pcard-tags">
-        <span class="pcard-tag">robotics</span><span class="pcard-tag">ros2</span><span class="pcard-tag">kinematics</span><span class="pcard-tag">opencv</span>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="gearSearch" oninput="filterGear()">
       </div>
-      <div class="pcard-link">Planned</div>
+      <div class="gear-categories" id="gearList"></div>
+      <div class="inquiry-form">
+        <h3><span class="en-only">Inquiry / Get a Quote</span><span class="zh-only">询价 / 预约咨询</span></h3>
+        <p><span class="en-only">Fill out the form and I'll get back to you within 24 hours.</span><span class="zh-only">填写以下表单，我会在 24 小时内回复。</span></p>
+        <div class="form-grid">
+          <div class="form-row"><label><span class="en-only">Name</span><span class="zh-only">姓名</span></label><input type="text"></div>
+          <div class="form-row"><label>Email</label><input type="email"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row"><label><span class="en-only">Start Date</span><span class="zh-only">开始日期</span></label><input type="date"></div>
+          <div class="form-row"><label><span class="en-only">End Date</span><span class="zh-only">结束日期</span></label><input type="date"></div>
+        </div>
+        <div class="form-row"><label><span class="en-only">Equipment & Notes</span><span class="zh-only">器材需求 & 备注</span></label><textarea></textarea></div>
+        <button class="form-submit" onclick="alert('Message sent! (Demo)')"><span><span class="en-only">Send Inquiry</span><span class="zh-only">发送询价</span></span></button>
+      </div>
     </div>
+  </div>
+</div>
 
+<!-- ===== PAGE: DEV ===== -->
+<div class="page" id="page-dev">
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
+      <span class="en-only">Dev Lab</span><span class="zh-only">开发实验室</span>
+    </div>
+    <div class="sec-pad" id="dev-list-view">
+      <div class="sec-header">
+        <div class="sec-label"><span class="label-line"></span><span class="label-text-dev"><span class="en-only">Projects & Experiments</span><span class="zh-only">项目 & 实验</span></span></div>
+        <div class="sec-title"><span class="en-only">Dev Lab</span><span class="zh-only">开发实验室</span></div>
+        <div class="sec-desc">
+          <span class="en-only">Hardware hacks, AI pipelines, and software tools — from ESP32 to production systems.</span>
+          <span class="zh-only">硬件改造、AI 流水线与软件工具——从 ESP32 到生产系统。</span>
+        </div>
+      </div>
+      <div class="dev-toggle">
+        <button class="dev-toggle-btn active" onclick="filterDev('all',this)"><span class="en-only">All</span><span class="zh-only">全部</span></button>
+        <button class="dev-toggle-btn" onclick="filterDev('hw',this)"><span class="en-only">⚙ Hardware</span><span class="zh-only">⚙ 硬件</span></button>
+        <button class="dev-toggle-btn" onclick="filterDev('sw',this)"><span class="en-only">✦ Software</span><span class="zh-only">✦ 软件</span></button>
+      </div>
+      <div class="dev-grid" id="devGrid"></div>
+    </div>
+    <div class="sec-pad" id="dev-detail-view" style="display:none">
+      <button class="back-btn" onclick="showDevList()"><span class="arrow">←</span> <span class="en-only">Back to all projects</span><span class="zh-only">返回全部项目</span></button>
+      <div class="case-study" id="devDetail"></div>
+    </div>
   </div>
-</section>
+</div>
 
-<!-- TOOLKIT -->
-<section class="toolkit" id="tools">
-  <div class="section-header">
-    <div>
-      <div class="section-subtitle">// what i work with</div>
-      <div class="section-title">Toolkit</div>
+<!-- ===== PAGE: ABOUT ===== -->
+<div class="page" id="page-about">
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
+      <span class="en-only">About</span><span class="zh-only">关于我</span>
+    </div>
+    <div class="sec-pad">
+      <div class="sec-header">
+        <div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Who I Am</span><span class="zh-only">关于我</span></span></div>
+        <div class="sec-title"><span class="en-only">About Me</span><span class="zh-only">关于我</span></div>
+      </div>
+      <div class="about-hero">
+        <div>
+          <div class="about-story">
+            <span class="en-only">
+              <p>I'm Rick — a <strong>film & media producer</strong> turned <strong>hardware hacker</strong> and <strong>AI toolmaker</strong>.</p><br>
+              <p>My journey started on film sets, where I learned to manage chaos, coordinate teams, and bring creative visions to life under tight deadlines. That hands-on production experience shaped how I think about <strong>building systems</strong>.</p><br>
+              <p>Now I split my time between <strong>managing productions</strong>, studying management at <strong>CIAM</strong>, and hacking on hardware/software projects. I wire up ESP32 boards, build AI comic pipelines with ComfyUI and FLUX, and automate everything I can touch.</p><br>
+              <p>I believe the most interesting work happens when you <strong>refuse to pick a lane</strong> — when film production thinking meets embedded systems meets generative AI.</p>
+            </span>
+            <span class="zh-only">
+              <p>我是 Rick——一个从<strong>影视制片人</strong>转型的<strong>硬件极客</strong>和 <strong>AI 工具开发者</strong>。</p><br>
+              <p>我的旅程始于片场。在那里我学会了管理混乱、协调团队、在紧迫的截止日期下将创意变为现实。这些实战经验塑造了我对<strong>系统构建</strong>的思维方式。</p><br>
+              <p>现在我在<strong>制片管理</strong>、<strong>CIAM 管理学</strong>学业，以及硬件/软件项目之间切换。我焊接 ESP32 开发板、用 ComfyUI 和 FLUX 搭建 AI 漫画流水线、自动化一切可以自动化的东西。</p><br>
+              <p>我相信最有趣的工作发生在你<strong>拒绝只走一条路</strong>的时候——当影视制片思维遇上嵌入式系统遇上生成式 AI。</p>
+            </span>
+          </div>
+        </div>
+        <div class="about-photo">📸</div>
+      </div>
+      <div class="sec-header" style="margin-top:2rem">
+        <div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Journey</span><span class="zh-only">历程</span></span></div>
+        <div class="sec-title" style="font-size:1.8rem"><span class="en-only">Timeline</span><span class="zh-only">时间线</span></div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-year">2018 - 2021</div><div class="timeline-title"><span class="en-only">Film Production</span><span class="zh-only">影视制片</span></div><div class="timeline-desc"><span class="en-only">Started in film production — worked on short dramas, commercials, and independent films as UPM, line producer, and cinematographer.</span><span class="zh-only">进入影视行业，参与短剧、广告和独立电影制作。担任制片主任、执行制片、摄影指导等角色。</span></div></div>
+        <div class="timeline-item"><div class="timeline-year">2022</div><div class="timeline-title"><span class="en-only">CIAM — Management Studies</span><span class="zh-only">CIAM — 管理学深造</span></div><div class="timeline-desc"><span class="en-only">Enrolled at California Institute of Advanced Management to study Drucker-based management.</span><span class="zh-only">就读加州高级管理学院，学习德鲁克管理学。</span></div></div>
+        <div class="timeline-item"><div class="timeline-year">2023</div><div class="timeline-title"><span class="en-only">Hardware & IoT Exploration</span><span class="zh-only">硬件 & IoT 探索</span></div><div class="timeline-desc"><span class="en-only">Dove into ESP32 and Arduino — built smart home devices, servo controllers, NFC systems.</span><span class="zh-only">深入 ESP32 和 Arduino 世界——智能家居、伺服控制器、NFC 多卡系统。</span></div></div>
+        <div class="timeline-item active"><div class="timeline-year">2024 - Now</div><div class="timeline-title"><span class="en-only">AI Pipelines & Full Stack</span><span class="zh-only">AI 流水线 & 全栈开发</span></div><div class="timeline-desc"><span class="en-only">Building AI-driven manga production pipelines, CrewAI orchestration, and exploring robotics.</span><span class="zh-only">构建 AI 漫画流水线、CrewAI 编排系统，探索机器人技术。</span></div></div>
+      </div>
+      <div class="sec-header"><div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Download</span><span class="zh-only">下载</span></span></div><div class="sec-title" style="font-size:1.8rem"><span class="en-only">Resume / CV</span><span class="zh-only">简历</span></div></div>
+      <div class="resume-section">
+        <button class="resume-btn magnetic" onclick="alert('Download English CV (Demo)')">📄 English CV (PDF)</button>
+        <button class="resume-btn magnetic" onclick="alert('Download 中文简历 (Demo)')">📄 中文简历 (PDF)</button>
+      </div>
+      <div class="sec-header" style="margin-top:2rem"><div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Get in Touch</span><span class="zh-only">联系方式</span></span></div><div class="sec-title" style="font-size:1.8rem"><span class="en-only">Contact</span><span class="zh-only">联系我</span></div></div>
+      <div class="contact-grid">
+        <div class="contact-card magnetic"><div class="contact-card-icon">📧</div><div class="contact-card-label">Email</div><div class="contact-card-value"><a href="mailto:rick@example.com">rick@example.com</a></div></div>
+        <div class="contact-card magnetic"><div class="contact-card-icon">💼</div><div class="contact-card-label">LinkedIn</div><div class="contact-card-value"><a href="#" target="_blank">LinkedIn Profile</a></div></div>
+        <div class="contact-card magnetic"><div class="contact-card-icon">🐙</div><div class="contact-card-label">GitHub</div><div class="contact-card-value"><a href="#" target="_blank">GitHub Profile</a></div></div>
+        <div class="contact-card magnetic"><div class="contact-card-icon">🎬</div><div class="contact-card-label">IMDb</div><div class="contact-card-value"><a href="#" target="_blank">IMDb Page</a></div></div>
+      </div>
+      <div class="inquiry-form" style="margin-top:2rem">
+        <h3><span class="en-only">Send a Message</span><span class="zh-only">给我留言</span></h3>
+        <p><span class="en-only">Have a project idea or want to collaborate?</span><span class="zh-only">有项目想法或想合作？</span></p>
+        <div class="form-grid">
+          <div class="form-row"><label><span class="en-only">Name</span><span class="zh-only">姓名</span></label><input type="text"></div>
+          <div class="form-row"><label>Email</label><input type="email"></div>
+        </div>
+        <div class="form-row"><label><span class="en-only">Message</span><span class="zh-only">留言内容</span></label><textarea></textarea></div>
+        <button class="form-submit" onclick="alert('Message sent! (Demo)')"><span><span class="en-only">Send Message</span><span class="zh-only">发送留言</span></span></button>
+      </div>
     </div>
   </div>
-  <div class="tools-wrap">
-    <div class="tools-track" id="toolsTrack">
-      <span class="tool-pill">Python</span>
-      <span class="tool-pill">Bash / Shell</span>
-      <span class="tool-pill">ESP32 / ESP8266</span>
-      <span class="tool-pill">Arduino C++</span>
-      <span class="tool-pill">Home Assistant</span>
-      <span class="tool-pill">MQTT</span>
-      <span class="tool-pill">ComfyUI</span>
-      <span class="tool-pill">FLUX.1</span>
-      <span class="tool-pill">CrewAI</span>
-      <span class="tool-pill">Claude API</span>
-      <span class="tool-pill">Git</span>
-      <span class="tool-pill">Docker</span>
-      <span class="tool-pill">FFmpeg</span>
-      <span class="tool-pill">Premiere Pro</span>
-      <span class="tool-pill">DaVinci Resolve</span>
-      <span class="tool-pill">YOLOv8</span>
-      <span class="tool-pill">KiCad / 立创EDA</span>
-      <span class="tool-pill">Raspberry Pi</span>
-    </div>
-  </div>
-</section>
+</div>
 
-<!-- TERMINAL -->
-<section class="terminal-section" id="contact">
-  <div class="section-header">
-    <div>
-      <div class="section-subtitle">// get in touch</div>
-      <div class="section-title">Connect</div>
+<!-- ===== PAGE: BLOG ===== -->
+<div class="page" id="page-blog">
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
+      <span class="en-only">Blog</span><span class="zh-only">博客</span>
+    </div>
+    <div class="sec-pad" id="blog-list-view">
+      <div class="sec-header">
+        <div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Writing</span><span class="zh-only">写作</span></span></div>
+        <div class="sec-title"><span class="en-only">Blog</span><span class="zh-only">博客</span></div>
+        <div class="sec-desc"><span class="en-only">Notes on filmmaking, tech DIY, and thoughts on life and management.</span><span class="zh-only">影视笔记、Tech DIY 与生活/MBA 思考。</span></div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterBlog('all',this)"><span class="en-only">All</span><span class="zh-only">全部</span></button>
+        <button class="filter-btn" onclick="filterBlog('film',this)"><span class="en-only">Film Notes</span><span class="zh-only">影视笔记</span></button>
+        <button class="filter-btn" onclick="filterBlog('tech',this)"><span class="en-only">Tech DIY</span><span class="zh-only">Tech DIY</span></button>
+        <button class="filter-btn" onclick="filterBlog('life',this)"><span class="en-only">Life / MBA</span><span class="zh-only">生活/MBA</span></button>
+      </div>
+      <div class="blog-grid" id="blogGrid"></div>
+    </div>
+    <div class="sec-pad" id="blog-detail-view" style="display:none">
+      <button class="back-btn" onclick="showBlogList()"><span class="arrow">←</span> <span class="en-only">Back to all posts</span><span class="zh-only">返回全部文章</span></button>
+      <div class="blog-detail" id="blogDetail"></div>
     </div>
   </div>
-  <div class="terminal">
-    <div class="terminal-bar">
-      <div class="terminal-dot r"></div>
-      <div class="terminal-dot y"></div>
-      <div class="terminal-dot g"></div>
-      <div class="terminal-title">rick@universe ~ %</div>
-    </div>
-    <div class="terminal-body">
-      <div><span class="t-prompt">$</span> <span class="t-cmd">whoami</span></div>
-      <div class="t-output">Rick — Producer / Builder / Eternal Student</div>
-      <br>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">cat interests.txt</span></div>
-      <div class="t-output">Film Production | IoT & Robotics | AI Pipelines | Management (CIAM)</div>
-      <br>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">echo $CONTACT</span></div>
-      <div class="t-output">GitHub: <a href="https://github.com/YOURUSERNAME" style="color:var(--green)" target="_blank">github.com/YOURUSERNAME</a></div>
-      <br>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">echo $PHILOSOPHY</span></div>
-      <div class="t-output">"The most interesting work happens at the intersection of disciplines."</div>
-      <br>
-      <div><span class="t-prompt">$</span> <span class="t-cmd"></span><span class="t-cursor"></span></div>
-    </div>
-  </div>
-</section>
+</div>
 
+<!-- ===== FOOTER ===== -->
 <footer>
-  <div class="footer-left">&copy; 2026 Rick — Built with curiosity</div>
+  <div class="footer-left">© 2026 Rick — Built with curiosity & solder</div>
   <div class="footer-links">
-    <a href="#home">Top &uarr;</a>
-    <a href="https://github.com/YOURUSERNAME" target="_blank">GitHub</a>
+    <a onclick="navigate('home')">Home</a>
+    <a onclick="navigate('about')">About</a>
+    <a href="#" target="_blank">GitHub</a>
   </div>
 </footer>
 
 <script>
-// Nav scroll effect
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 60);
+// ===== PARTICLE / CONSTELLATION CANVAS =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let mouse = {x:0,y:0};
+const PARTICLE_COUNT = 60;
+const CONNECT_DIST = 150;
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor(){
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
+    this.vx = (Math.random()-.5)*.3;
+    this.vy = (Math.random()-.5)*.3;
+    this.r = Math.random()*1.5+.5;
+    // Blend warm (film) and cool (tech) colors
+    this.color = Math.random()>.5 ? 'rgba(212,168,83,' : 'rgba(34,211,238,';
+  }
+  update(){
+    this.x += this.vx;
+    this.y += this.vy;
+    if(this.x<0||this.x>canvas.width) this.vx*=-1;
+    if(this.y<0||this.y>canvas.height) this.vy*=-1;
+    // Gentle mouse repulsion
+    const dx=this.x-mouse.x, dy=this.y-mouse.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<200){
+      this.x += dx/dist*0.5;
+      this.y += dy/dist*0.5;
+    }
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle = this.color+'0.3)';
+    ctx.fill();
+  }
+}
+
+for(let i=0;i<PARTICLE_COUNT;i++) particles.push(new Particle());
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update();p.draw()});
+  // Draw connections
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x;
+      const dy=particles[i].y-particles[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<CONNECT_DIST){
+        const alpha = (1-dist/CONNECT_DIST)*0.08;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle = `rgba(140,160,180,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ===== CURSOR GLOW =====
+const glow = document.getElementById('cursorGlow');
+let glowVisible = false;
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  glow.style.left = e.clientX+'px';
+  glow.style.top = e.clientY+'px';
+  if(!glowVisible){glow.classList.add('visible');glowVisible=true}
+});
+document.addEventListener('mouseleave', () => {
+  glow.classList.remove('visible');glowVisible=false;
 });
 
-// Scroll reveal
-const revealEls = document.querySelectorAll('.stat-card, .project-card, .terminal');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity = '0';
-      entry.target.style.transform = 'translateY(20px)';
-      entry.target.style.transition = `all .5s ease ${i * 0.08}s`;
-      requestAnimationFrame(() => {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      });
-      observer.unobserve(entry.target);
+// ===== MAGNETIC HOVER =====
+document.querySelectorAll('.magnetic').forEach(el => {
+  el.addEventListener('mousemove', e => {
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width/2;
+    const y = e.clientY - rect.top - rect.height/2;
+    el.style.transform = `translate(${x*0.08}px,${y*0.08}px)`;
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.transform = '';
+  });
+});
+
+// ===== SCROLL REVEAL (Intersection Observer) =====
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry,i) => {
+    if(entry.isIntersecting){
+      entry.target.style.transitionDelay = (i*0.05)+'s';
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
     }
   });
-}, { threshold: 0.1 });
-revealEls.forEach(el => observer.observe(el));
+},{threshold:0.08});
 
-// Duplicate tools for infinite scroll
-const track = document.getElementById('toolsTrack');
-track.innerHTML += track.innerHTML;
-
-// Smooth anchor scroll
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
+function observeReveals(){
+  document.querySelectorAll('.prod-card,.dev-card,.gear-card,.blog-card,.contact-card,.timeline-item,.gallery-item').forEach(el=>{
+    el.classList.add('reveal');
+    revealObserver.observe(el);
   });
+}
+
+// ===== DATA =====
+const prodData = [
+  {id:'proj1',type:'drama',title:{en:'Whispers of the East',zh:'东方低语'},role:{en:'Unit Production Manager',zh:'制片主任'},desc:{en:'A 12-episode vertical short drama exploring cultural identity in modern China. Led a crew of 25+ across 3 shooting locations over 4 weeks. Managed a ¥800K budget and coordinated post-production with VFX team.',zh:'12 集竖屏短剧，探索现代中国的文化认同。带领 25+ 人团队，在 3 个拍摄地完成 4 周拍摄。管理 80 万预算，协调 VFX 后期团队。'},gallery:3,video:true},
+  {id:'proj2',type:'film',title:{en:'Borderline',zh:'边界'},role:{en:'Producer / Cinematographer',zh:'制片 / 摄影指导'},desc:{en:'Award-nominated short film about immigrant experiences. Dual role as producer and DP — handled logistics, budgeting, and shot the film on BMPCC 6K with vintage anamorphic lenses.',zh:'提名奖项的移民题材短片。制片与摄影双重身份——负责统筹、预算，使用 BMPCC 6K 搭配复古变形镜头拍摄。'},gallery:4,video:true},
+  {id:'proj3',type:'commercial',title:{en:'TechFlow Brand Film',zh:'TechFlow 品牌片'},role:{en:'Executive Producer',zh:'执行制片'},desc:{en:'60-second brand film for a Silicon Valley startup. Conceptualized the visual story, managed client relations, hired crew, and delivered final cut within a 2-week turnaround.',zh:'硅谷创业公司 60 秒品牌宣传片。构思视觉故事、管理客户关系、组建团队，2 周内完成交付。'},gallery:2,video:true},
+  {id:'proj4',type:'drama',title:{en:'The Algorithm',zh:'算法人生'},role:{en:'Line Producer',zh:'执行制片'},desc:{en:'Sci-fi short drama series exploring AI consciousness. Managed day-to-day operations, scheduling, and kept production on track despite location challenges.',zh:'科幻短剧系列，探索 AI 意识主题。负责日常运营、排期管理，在多个拍摄地点挑战下保持制作进度。'},gallery:3,video:false},
+  {id:'proj5',type:'commercial',title:{en:'Golden Gate Eats',zh:'金门美食'},role:{en:'Producer / Camera Op',zh:'制片 / 摄影'},desc:{en:'Food & lifestyle commercial series for Bay Area restaurants. Fast-paced production with same-day edits delivered for social media campaigns.',zh:'湾区餐厅美食生活类广告系列。快节奏制作，当天完成剪辑并投放社交媒体。'},gallery:2,video:true},
+  {id:'proj6',type:'film',title:{en:'Silent Current',zh:'暗流'},role:{en:'Cinematographer',zh:'摄影指导'},desc:{en:'Moody noir-style short film. Shot on RED Komodo with vintage Helios lenses. Extensive color grading in DaVinci Resolve.',zh:'暗色调黑色电影风格短片。使用 RED Komodo 搭配 Helios 复古镜头拍摄。DaVinci Resolve 深度调色。'},gallery:3,video:true}
+];
+const gearData = {
+  camera:[{name:'RED Komodo 6K',spec:'6K Super 35, RF Mount, ProRes / R3D',price:'$350/day'},{name:'BMPCC 6K Pro',spec:'6K Super 35, EF Mount, BRAW',price:'$150/day'},{name:'Sony FX6',spec:'4K Full Frame, E-Mount, S-Log3',price:'$300/day'},{name:'Sony A7S III',spec:'4K Full Frame, E-Mount',price:'$120/day'},{name:'DJI Ronin 4D',spec:'4-Axis Gimbal, 6K, LiDAR',price:'$500/day'}],
+  lens:[{name:'Canon CN-E Primes',spec:'14/24/35/50/85 T1.5, EF',price:'$200/day set'},{name:'Sigma 18-35mm T2',spec:'Cine Zoom, EF Mount',price:'$80/day'},{name:'Helios 44-2 58mm',spec:'Vintage, M42 Adapter',price:'$25/day'},{name:'Atlas Mercury Anamorphic',spec:'40/65mm T2.2, LPL',price:'$250/day set'}],
+  lighting:[{name:'Aputure 600d Pro',spec:'600W Daylight COB LED',price:'$80/day'},{name:'Aputure 300d II',spec:'300W Daylight COB LED',price:'$50/day'},{name:'Aputure MC Kit (x4)',spec:'RGBWW Mini LED Panels',price:'$40/day'},{name:'ARRI SkyPanel S60-C',spec:'RGBW LED Softlight',price:'$120/day'}],
+  grip:[{name:'DJI RS 3 Pro',spec:'3-Axis Gimbal, 4.5kg',price:'$50/day'},{name:'Sachtler Ace XL',spec:'Fluid Head Tripod',price:'$35/day'},{name:'Dana Dolly Kit',spec:'Portable Dolly + 6ft Rails',price:'$60/day'},{name:'EasyRig Vario 5',spec:'5-17kg Support',price:'$70/day'}],
+  audio:[{name:'Sennheiser MKH 416',spec:'Shotgun Mic',price:'$40/day'},{name:'Sound Devices MixPre-6',spec:'6-Channel Recorder',price:'$75/day'},{name:'Sennheiser G4 Wireless',spec:'Lav Kit (x2)',price:'$50/day'}]
+};
+const devData = [
+  {id:'dev1',cat:'hw',title:{en:'Smart Trash Can',zh:'智能垃圾桶'},icon:'🗑️',desc:{en:'ESP32-powered trash can with gesture sensing, auto-open lid, and Home Assistant integration.',zh:'基于 ESP32 的智能垃圾桶，支持手势感应、自动开盖，接入 Home Assistant。'},stack:['ESP32','Servo','HC-SR04','MQTT','HA'],problem:{en:'Manual trash can lids are unhygienic; commercial smart ones are overpriced.',zh:'手动垃圾桶盖不卫生，商用智能垃圾桶太贵。'},solution:{en:'ESP32 + ultrasonic sensor + servo motor. Lid opens when hand detected within 15cm, auto-closes after 5s. MQTT integration for HA tracking.',zh:'ESP32 + 超声波传感器 + 舵机。手在 15cm 内检测到自动开盖，5 秒后关闭。MQTT 接入 HA。'},result:{en:'Cost: ~$8 in parts. Running 24/7 for 6 months. Blog post went viral.',zh:'成本约 ¥60，稳定运行 6 个月。博客文章在 Maker 社区走红。'},github:'#',blog:'blog1'},
+  {id:'dev2',cat:'hw',title:{en:'NFC Multi-Card Device',zh:'NFC 多卡合一设备'},icon:'💳',desc:{en:'Consolidate multiple NFC cards into one ESP32-based device with OLED display.',zh:'将多张 NFC 卡整合到一个 ESP32 设备中，OLED 屏幕选择切换。'},stack:['ESP32','PN532','OLED','3D Print','LiPo'],problem:{en:'Carrying multiple access cards is annoying.',zh:'携带多张门禁卡很烦。'},solution:{en:'ESP32 + PN532 reads/stores card UIDs. OLED + rotary encoder for selection. 3D-printed case with LiPo.',zh:'ESP32 + PN532 读取存储卡片 UID。OLED + 旋转编码器选择。3D 打印外壳 + LiPo。'},result:{en:'Cloned 5 access cards. Battery lasts ~2 weeks. Keychain-sized.',zh:'克隆 5 张门禁卡，续航约 2 周，可挂钥匙链。'},github:'#'},
+  {id:'dev3',cat:'sw',title:{en:'AI Manga Pipeline',zh:'AI 漫画制作流水线'},icon:'🎨',desc:{en:'Multi-agent pipeline for vertical manga using ComfyUI + FLUX.1 + CrewAI.',zh:'基于 ComfyUI + FLUX.1 + CrewAI 的竖屏漫画多智能体流水线。'},stack:['Python','ComfyUI','FLUX.1','CrewAI','Claude API','Docker'],problem:{en:'Creating consistent manga for Douyin requires too much manual work.',zh:'为抖音短剧制作风格一致的漫画需要大量人工。'},solution:{en:'CrewAI orchestrates story generation (Claude API), character consistency (FLUX.1 + LoRA), panel layout, text overlay. ComfyUI handles image generation.',zh:'CrewAI 编排故事生成（Claude API）、角色一致性（FLUX.1 + LoRA）、分镜布局和文字排版。ComfyUI 处理图像生成。'},result:{en:'Per-episode time: 8h → 45min. 《地母七重奏》in production.',zh:'单集时间 8h → 45min。《地母七重奏》制作中。'},github:'#'},
+  {id:'dev4',cat:'sw',title:{en:'Production Mgmt Tool',zh:'制片管理工具'},icon:'📋',desc:{en:'Python CLI for film production schedules, crew contacts, and budget tracking.',zh:'Python CLI 工具，管理排期、团队联系和预算。'},stack:['Python','SQLite','Click','Rich','Docker'],problem:{en:'Spreadsheet chaos on small productions.',zh:'小型制作项目表格混乱。'},solution:{en:'CLI with Rich terminal UI. SQLite stores schedules, contacts, budget. PDF export.',zh:'Rich 终端 UI + SQLite 存储排期、联系方式、预算。支持 PDF 导出。'},result:{en:'Used on 3 productions. Saved ~2h/week. Open-sourced.',zh:'已在 3 个项目中使用，每周省约 2h。已开源。'},github:'#'},
+  {id:'dev5',cat:'hw',title:{en:'Gyro Game Controller',zh:'陀螺仪游戏手柄'},icon:'🎮',desc:{en:'ESP32 + MPU6050 gyro-based BLE HID game controller.',zh:'ESP32 + MPU6050 陀螺仪蓝牙游戏手柄。'},stack:['ESP32','MPU6050','BLE HID','3D Print','LiPo'],problem:{en:'Wanted motion-controlled gaming without expensive controllers.',zh:'想要体感游戏但不想买贵手柄。'},solution:{en:'ESP32 reads gyro data, maps tilt to directional input, sends via BLE HID.',zh:'ESP32 读取陀螺仪数据，映射倾斜为方向输入，BLE HID 发送。'},result:{en:'Latency <20ms. Works with any BLE device.',zh:'延迟 <20ms，兼容所有 BLE 设备。'},github:'#'},
+  {id:'dev6',cat:'sw',title:{en:'Shell 30-Day Mastery',zh:'Shell 30 天精通'},icon:'$_',desc:{en:'Interactive Shell/Bash learning system with progress tracking.',zh:'Shell/Bash 交互式学习系统，带进度追踪。'},stack:['HTML','CSS','JS','Bash'],problem:{en:'No structured Shell curriculum from zero to production.',zh:'缺少从零到生产就绪的 Shell 课程。'},solution:{en:'Web-based curriculum with 30 lessons, embedded exercises, localStorage progress.',zh:'Web 课程，30 节课，内嵌练习，localStorage 进度。'},result:{en:'Completed myself. Now used by 3 friends.',zh:'自己完成全部课程，3 个朋友在用。'},github:'#'}
+];
+const blogData = [
+  {id:'blog1',tag:'tech',title:{en:'Building a Smart Trash Can with ESP32',zh:'用 ESP32 打造智能垃圾桶——完整指南'},date:'2026-02-15',excerpt:{en:'A step-by-step build log from parts list to Home Assistant integration.',zh:'从零件清单到 Home Assistant 集成的完整制作记录。'},crosslink:{type:'dev',id:'dev1',label:{en:'View project →',zh:'查看项目 →'}},body:{en:'<h2>Why Build This?</h2><p>Commercial smart trash cans cost $50-200. I built one for <strong>$8 in parts</strong> running 24/7 for 6 months.</p><h2>Parts List</h2><p>ESP32 DevKit (~$3), HC-SR04 (~$1), SG90 servo (~$1), jumper wires, USB cable.</p><h2>The Build</h2><p>Mount ultrasonic sensor at 45° downward — catches hand motion without false triggers. Servo needs a simple lever arm attached to the lid...</p><h3>MQTT Integration</h3><p>Adding MQTT is trivial with <code>PubSubClient</code>. Publish open/close events and track usage in Home Assistant.</p>',zh:'<h2>为什么要做？</h2><p>商用智能垃圾桶 300-1500 元。我用<strong>约 60 元零件</strong>做了一个，稳定运行 6 个月。</p><h2>零件</h2><p>ESP32（约 20 元）、HC-SR04（约 5 元）、SG90（约 8 元）、杜邦线、USB 线。</p><h2>制作</h2><p>超声波传感器向下 45°——检测手部不误触。舵机加杠杆臂连接桶盖...</p><h3>MQTT 集成</h3><p>用 <code>PubSubClient</code> 添加 MQTT，发布开关事件，Home Assistant 追踪使用量。</p>'}},
+  {id:'blog2',tag:'film',title:{en:'What UPM School Doesn\'t Teach You',zh:'制片主任学校没教你的事'},date:'2026-01-28',excerpt:{en:'Lessons from the trenches of short drama production.',zh:'短剧制片一线的经验教训。'},crosslink:null,body:{en:'<h2>The Real Job</h2><p><strong>No plan survives first contact with reality.</strong> Here are things I learned the hard way...</p><h2>Budget Truth</h2><p>Always add 15% contingency. Always.</p><h2>Crew Communication</h2><p>The most important skill isn\'t budgeting — it\'s <strong>reading the room</strong>. A tired crew makes mistakes. A fed crew works miracles.</p>',zh:'<h2>真正的工作</h2><p><strong>没有计划能在现实面前存活。</strong>以下是血泪经验...</p><h2>预算真相</h2><p>永远预留 15% 应急资金。永远。</p><h2>团队沟通</h2><p>最重要的技能不是做预算——是<strong>察言观色</strong>。疲惫团队犯错，吃饱团队创造奇迹。</p>'}},
+  {id:'blog3',tag:'life',title:{en:'Drucker in the Edit Room',zh:'剪辑室里的德鲁克'},date:'2026-01-10',excerpt:{en:'How Drucker-based management changed my approach to film production.',zh:'德鲁克管理学如何改变了我的制片思维。'},crosslink:null,body:{en:'<h2>The Unexpected Overlap</h2><p>Drucker\'s ideas about <strong>effectiveness vs. efficiency</strong> directly map to production challenges...</p><h2>Knowledge Workers on Set</h2><p>Each department head is an expert making autonomous decisions. The producer\'s job is to <strong>create conditions for their best work</strong>.</p>',zh:'<h2>意想不到的交集</h2><p>德鲁克关于<strong>效果与效率</strong>的理论直接适用于制片...</p><h2>片场上的知识工作者</h2><p>每个部门负责人都是独立决策的专家。制片人的工作是<strong>创造最好的工作条件</strong>。</p>'}},
+  {id:'blog4',tag:'tech',title:{en:'ComfyUI + FLUX.1: Character Consistency',zh:'ComfyUI + FLUX.1：角色一致性流水线'},date:'2025-12-20',excerpt:{en:'Technical deep-dive into maintaining character consistency in AI manga.',zh:'AI 漫画角色一致性的技术深度解析。'},crosslink:{type:'dev',id:'dev3',label:{en:'View project →',zh:'查看项目 →'}},body:{en:'<h2>The Consistency Problem</h2><p>One image is easy. <strong>20 panels with the same character</strong> is a nightmare...</p><h2>LoRA Strategy</h2><p>Train character LoRA: 15-20 images, consistent lighting, varied angles. Rank 16, 1500 steps.</p>',zh:'<h2>一致性问题</h2><p>一张图简单。<strong>20 个分镜同一角色</strong>则是噩梦...</p><h2>LoRA 策略</h2><p>训练角色 LoRA：15-20 张图，统一光照，不同角度。rank 16，1500 步。</p>'}},
+  {id:'blog5',tag:'life',title:{en:'Why I Refuse to Pick a Lane',zh:'为什么我拒绝只走一条路'},date:'2025-11-15',excerpt:{en:'On being a producer who codes and why cross-disciplinary thinking matters.',zh:'一个会写代码的制片人，跨学科思维为何重要。'},crosslink:null,body:{en:'<h2>The Question</h2><p>"So what do you actually do?" The honest answer: <strong>I build things across domains.</strong></p>',zh:'<h2>最常被问的问题</h2><p>"你到底做什么？"诚实回答：<strong>我在不同领域构建东西。</strong></p>'}}
+];
+
+// ===== LANGUAGE =====
+let currentLang='en';
+function setLang(lang){
+  currentLang=lang;
+  document.documentElement.setAttribute('data-lang',lang);
+  document.getElementById('langEn').classList.toggle('active',lang==='en');
+  document.getElementById('langZh').classList.toggle('active',lang==='zh');
+  document.getElementById('gearSearch').placeholder=lang==='zh'?'搜索器材...':'Search equipment...';
+  renderCurrentPage();
+}
+function t(obj){if(!obj)return'';if(typeof obj==='string')return obj;return obj[currentLang]||obj.en||''}
+
+// ===== ROUTING =====
+let currentPage='home';
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+page);
+  if(target){target.classList.add('active');currentPage=page}
+  document.querySelectorAll('.nav-center a').forEach(a=>a.classList.toggle('active',a.dataset.page===page));
+  window.location.hash=page==='home'?'':page;
+  window.scrollTo(0,0);
+  renderCurrentPage();
+  // Re-observe after render
+  requestAnimationFrame(observeReveals);
+}
+function renderCurrentPage(){
+  switch(currentPage){
+    case'production':renderProdGrid();break;
+    case'gear':renderGear();break;
+    case'dev':renderDevGrid();break;
+    case'blog':renderBlogGrid();break;
+  }
+}
+window.addEventListener('hashchange',()=>{const h=window.location.hash.slice(1)||'home';if(h!==currentPage)navigate(h)});
+window.addEventListener('DOMContentLoaded',()=>{
+  const h=window.location.hash.slice(1)||'home';
+  setLang('en');
+  if(h!=='home')navigate(h);
 });
+
+// ===== MOBILE =====
+function toggleMobile(){
+  const menu=document.getElementById('mobileMenu');
+  const btn=document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ===== NAV SCROLL =====
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50)});
+
+// ===== PRODUCTION =====
+let prodFilter='all';
+function filterProd(type,btn){
+  prodFilter=type;
+  btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProdGrid();
+  requestAnimationFrame(observeReveals);
+}
+function renderProdGrid(){
+  const grid=document.getElementById('prodGrid');
+  const items=prodFilter==='all'?prodData:prodData.filter(p=>p.type===prodFilter);
+  const typeLabels={drama:{en:'Short Drama',zh:'短剧'},film:{en:'Short Film',zh:'短片'},commercial:{en:'Commercial',zh:'广告'}};
+  grid.innerHTML=items.map(p=>`
+    <div class="prod-card" onclick="showProdDetail('${p.id}')">
+      <div class="prod-card-img"><span class="placeholder">🎬</span><div class="prod-card-overlay">VIEW PROJECT →</div></div>
+      <div class="prod-card-body">
+        <div class="prod-card-type">${t(typeLabels[p.type])}</div>
+        <div class="prod-card-title">${t(p.title)}</div>
+        <div class="prod-card-role">${t(p.role)}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('prod-list-view').style.display='';
+  document.getElementById('prod-detail-view').style.display='none';
+}
+function showProdDetail(id){
+  const p=prodData.find(x=>x.id===id);if(!p)return;
+  const typeLabels={drama:{en:'Short Drama',zh:'短剧'},film:{en:'Short Film',zh:'短片'},commercial:{en:'Commercial',zh:'广告'}};
+  const d=document.getElementById('prodDetail');
+  d.innerHTML=`
+    <h2 style="font-size:1.8rem;font-weight:700;letter-spacing:-1px;margin-bottom:.5rem">${t(p.title)}</h2>
+    <div class="prod-detail-meta"><span class="meta-tag role">${t(p.role)}</span><span class="meta-tag type-tag">${t(typeLabels[p.type])}</span></div>
+    <div class="prod-detail-hero"><span class="placeholder">🎬</span></div>
+    <div class="gallery">${Array(p.gallery).fill(0).map(()=>`<div class="gallery-item">🖼️</div>`).join('')}</div>
+    <div class="prod-detail-desc">${t(p.desc)}</div>
+    ${p.video?`<div class="video-embed"></div>`:''}
+  `;
+  document.getElementById('prod-list-view').style.display='none';
+  document.getElementById('prod-detail-view').style.display='';
+  window.scrollTo(0,0);
+  requestAnimationFrame(observeReveals);
+}
+function showProdList(){document.getElementById('prod-list-view').style.display='';document.getElementById('prod-detail-view').style.display='none';window.scrollTo(0,0)}
+
+// ===== GEAR =====
+function renderGear(){
+  const c=document.getElementById('gearList');
+  const s=(document.getElementById('gearSearch')?.value||'').toLowerCase();
+  const labels={camera:{en:'📹 Camera Bodies',zh:'📹 摄影机'},lens:{en:'🔭 Lenses',zh:'🔭 镜头'},lighting:{en:'💡 Lighting',zh:'💡 灯光'},grip:{en:'🔧 Grip & Support',zh:'🔧 Grip & 支撑'},audio:{en:'🎤 Audio',zh:'🎤 音频'}};
+  let html='';
+  for(const[cat,items]of Object.entries(gearData)){
+    const f=items.filter(g=>g.name.toLowerCase().includes(s)||g.spec.toLowerCase().includes(s));
+    if(!f.length)continue;
+    html+=`<div><div class="gear-category-title">${t(labels[cat])}<span class="cat-count">${f.length}</span></div><div class="gear-grid">${f.map(g=>`
+      <div class="gear-card"><div class="gear-card-img">📷</div><div class="gear-card-info"><div class="gear-card-name">${g.name}</div><div class="gear-card-spec">${g.spec}</div><div class="gear-card-price">${g.price}</div></div></div>
+    `).join('')}</div></div>`;
+  }
+  c.innerHTML=html||`<p style="color:var(--muted);font-size:.85rem">${currentLang==='zh'?'没有匹配器材':'No equipment found.'}</p>`;
+  requestAnimationFrame(observeReveals);
+}
+function filterGear(){renderGear()}
+
+// ===== DEV =====
+let devFilter='all';
+function filterDev(cat,btn){
+  devFilter=cat;
+  btn.closest('.dev-toggle').querySelectorAll('.dev-toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDevGrid();
+  requestAnimationFrame(observeReveals);
+}
+function renderDevGrid(){
+  const grid=document.getElementById('devGrid');
+  const items=devFilter==='all'?devData:devData.filter(d=>d.cat===devFilter);
+  grid.innerHTML=items.map(d=>`
+    <div class="dev-card ${d.cat}" onclick="showDevDetail('${d.id}')">
+      <div class="dev-card-icon">${d.icon}</div>
+      <div class="dev-card-title">${t(d.title)}</div>
+      <div class="dev-card-desc">${t(d.desc)}</div>
+      <div class="dev-card-stack">${d.stack.map(s=>`<span>${s}</span>`).join('')}</div>
+      <div class="dev-card-links">
+        ${d.github?`<a href="${d.github}" target="_blank" onclick="event.stopPropagation()">GitHub →</a>`:''}
+        ${d.blog?`<a href="#" onclick="event.stopPropagation();navigate('blog');setTimeout(()=>showBlogDetail('${d.blog}'),100);return false">${currentLang==='zh'?'博客 →':'Blog →'}</a>`:''}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('dev-list-view').style.display='';
+  document.getElementById('dev-detail-view').style.display='none';
+}
+function showDevDetail(id){
+  const d=devData.find(x=>x.id===id);if(!d)return;
+  const lbl=currentLang==='zh';
+  document.getElementById('devDetail').innerHTML=`
+    <h2 style="font-size:1.8rem;font-weight:700;letter-spacing:-1px;margin-bottom:.3rem">${d.icon} ${t(d.title)}</h2>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:2.5rem;font-weight:300">${t(d.desc)}</p>
+    <div class="case-section"><div class="case-section-title"><span class="cs-line"></span><span class="cs-text">${lbl?'问题':'Problem'}</span></div><div class="case-text">${t(d.problem)}</div></div>
+    <div class="case-section"><div class="case-section-title"><span class="cs-line"></span><span class="cs-text">${lbl?'方案':'Solution'}</span></div><div class="case-text">${t(d.solution)}</div></div>
+    <div class="case-section"><div class="case-section-title"><span class="cs-line"></span><span class="cs-text">${lbl?'技术栈':'Tech Stack'}</span></div><div class="case-stack-list">${d.stack.map(s=>`<span class="case-stack-item">${s}</span>`).join('')}</div></div>
+    <div class="case-section"><div class="case-section-title"><span class="cs-line"></span><span class="cs-text">${lbl?'成果':'Result'}</span></div><div class="case-result"><p>${t(d.result)}</p></div></div>
+    <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap">
+      ${d.github?`<a href="${d.github}" target="_blank" class="resume-btn magnetic">🐙 GitHub Repo</a>`:''}
+      ${d.blog?`<button class="resume-btn magnetic" onclick="navigate('blog');setTimeout(()=>showBlogDetail('${d.blog}'),100)">✍️ ${lbl?'相关博客':'Blog Post'}</button>`:''}
+    </div>
+  `;
+  document.getElementById('dev-list-view').style.display='none';
+  document.getElementById('dev-detail-view').style.display='';
+  window.scrollTo(0,0);
+}
+function showDevList(){document.getElementById('dev-list-view').style.display='';document.getElementById('dev-detail-view').style.display='none';window.scrollTo(0,0)}
+
+// ===== BLOG =====
+let blogFilter='all';
+function filterBlog(tag,btn){
+  blogFilter=tag;
+  btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBlogGrid();
+  requestAnimationFrame(observeReveals);
+}
+function renderBlogGrid(){
+  const grid=document.getElementById('blogGrid');
+  const items=blogFilter==='all'?blogData:blogData.filter(b=>b.tag===blogFilter);
+  const tagLabels={film:{en:'Film Notes',zh:'影视笔记'},tech:{en:'Tech DIY',zh:'Tech DIY'},life:{en:'Life / MBA',zh:'生活/MBA'}};
+  grid.innerHTML=items.map(b=>`
+    <div class="blog-card" data-tag="${b.tag}" onclick="showBlogDetail('${b.id}')">
+      <div class="blog-card-date">${b.date}</div>
+      <div class="blog-card-title">${t(b.title)}</div>
+      <div class="blog-card-excerpt">${t(b.excerpt)}</div>
+      <div class="blog-card-tags"><span class="blog-card-tag ${b.tag}">${t(tagLabels[b.tag])}</span></div>
+      ${b.crosslink?`<div class="blog-card-crosslink">🔗 <a href="#" onclick="event.stopPropagation();navigate('${b.crosslink.type}');setTimeout(()=>showDevDetail('${b.crosslink.id}'),100);return false">${t(b.crosslink.label)}</a></div>`:''}
+      <div class="blog-card-link">${currentLang==='zh'?'阅读全文':'Read more'} →</div>
+    </div>
+  `).join('');
+  document.getElementById('blog-list-view').style.display='';
+  document.getElementById('blog-detail-view').style.display='none';
+}
+function showBlogDetail(id){
+  const b=blogData.find(x=>x.id===id);if(!b)return;
+  const tagLabels={film:{en:'Film Notes',zh:'影视笔记'},tech:{en:'Tech DIY',zh:'Tech DIY'},life:{en:'Life / MBA',zh:'生活/MBA'}};
+  const colors={film:'var(--film-gold)',tech:'var(--cyan)',life:'var(--purple)'};
+  document.getElementById('blogDetail').innerHTML=`
+    <div class="blog-detail-title">${t(b.title)}</div>
+    <div class="blog-detail-meta"><span class="meta-tag">${b.date}</span><span class="meta-tag" style="color:${colors[b.tag]}">${t(tagLabels[b.tag])}</span></div>
+    <div class="blog-detail-body">${t(b.body)}</div>
+    ${b.crosslink?`<div style="margin-top:2rem;padding:1.2rem 1.5rem;background:var(--card);border:1px solid var(--border);border-radius:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--cyan),var(--purple))"></div><span style="font-family:var(--mono);font-size:.6rem;color:var(--blue);letter-spacing:1.5px">🔗 ${currentLang==='zh'?'相关项目':'RELATED PROJECT'}</span><a href="#" onclick="navigate('${b.crosslink.type}');setTimeout(()=>showDevDetail('${b.crosslink.id}'),100);return false" style="display:block;margin-top:.4rem;color:var(--cyan);font-weight:500;transition:color .3s">${t(b.crosslink.label)}</a></div>`:''}
+  `;
+  document.getElementById('blog-list-view').style.display='none';
+  document.getElementById('blog-detail-view').style.display='';
+  window.scrollTo(0,0);
+}
+function showBlogList(){document.getElementById('blog-list-view').style.display='';document.getElementById('blog-detail-view').style.display='none';window.scrollTo(0,0)}
 </script>
 </body>
 </html>
