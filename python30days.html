@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 30天学习计划</title>
+<style>
+:root{--bg:#0f0f13;--surface:#1a1a24;--card:#22222e;--border:rgba(255,255,255,0.08);--text:#e8e8f0;--muted:#888899;--accent:#7c6ff7;--accent2:#4ecdc4;--amber:#ffd166;--green:#06d6a0;--mono:'Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:2.5rem 2rem 2rem;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,111,247,.3) 0%,transparent 70%);border-radius:50%}
+.header-inner{position:relative;z-index:1;max-width:920px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:1.2rem}
+.logo-icon{width:44px;height:44px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;font-family:var(--mono)}
+h1{font-size:clamp(1.5rem,4vw,2rem);font-weight:700;margin-bottom:.3rem}
+.stats-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
+.stat-pill{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:20px;padding:.35rem .9rem;font-size:.8rem;display:flex;align-items:center;gap:5px}
+.stat-pill .num{font-weight:700;color:var(--accent)}
+.progress-section{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem}
+.progress-inner{max-width:920px;margin:0 auto}
+.progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:7px}
+.progress-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s ease}
+.controls{max-width:920px;margin:1.2rem auto;padding:0 2rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.8rem;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.search-box{margin-left:auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:.35rem .9rem;color:var(--text);font-size:.8rem;outline:none;width:170px}
+.search-box:focus{border-color:var(--accent)}
+.phase-header{max-width:920px;margin:1.5rem auto .7rem;padding:0 2rem;display:flex;align-items:center;gap:.8rem}
+.phase-title{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
+.phase-line{flex:1;height:1px;background:var(--border)}
+.phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.grid{max-width:920px;margin:0 auto;padding:0 2rem .5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.9rem}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.day-card:hover{border-color:rgba(124,111,247,.4);transform:translateY(-1px)}
+.day-card.completed{border-color:rgba(6,214,160,.35)}
+.day-card.completed::before,.day-card.today::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.day-card.completed::before{background:var(--green)}
+.day-card.today{border-color:var(--accent);box-shadow:0 0 18px rgba(124,111,247,.13)}
+.day-card.today::before{background:var(--accent)}
+.day-card.locked{opacity:.4;cursor:default}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem}
+.day-num{font-size:.68rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px}
+.day-badge{font-size:.62rem;padding:2px 6px;border-radius:7px;font-weight:600}
+.badge-today{background:rgba(124,111,247,.2);color:var(--accent)}
+.badge-done{background:rgba(6,214,160,.2);color:var(--green)}
+.badge-locked{background:rgba(255,255,255,.05);color:var(--muted)}
+.badge-available{background:rgba(255,209,102,.2);color:var(--amber)}
+.card-title{font-size:.92rem;font-weight:600;line-height:1.3;margin-bottom:.45rem}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.7rem}
+.tag{font-size:.62rem;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.06);color:var(--muted)}
+.card-topics{font-size:.76rem;color:var(--muted);line-height:1.5}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:.8rem;padding-top:.65rem;border-top:1px solid var(--border)}
+.complete-btn{padding:.28rem .75rem;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .2s}
+.complete-btn:hover{border-color:var(--green);color:var(--green)}
+.complete-btn.done{background:rgba(6,214,160,.15);border-color:var(--green);color:var(--green)}
+.detail-link{font-size:.7rem;color:var(--accent);cursor:pointer;background:none;border:none;padding:0}
+.detail-link:hover{text-decoration:underline}
+
+/* Expand panel */
+.expand-panel{max-width:920px;margin:.2rem auto .8rem;padding:0 2rem;display:none}
+.expand-panel.open{display:block}
+.expand-inner{background:#1e1e2a;border:1px solid rgba(124,111,247,.4);border-radius:16px;padding:1.6rem;position:relative}
+.ep-close{position:absolute;top:.9rem;right:.9rem;background:rgba(255,255,255,.07);border:none;color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.ep-close:hover{color:var(--text)}
+.ep-day{font-size:.7rem;color:var(--muted);font-family:var(--mono);margin-bottom:.25rem}
+.ep-title{font-size:1.2rem;font-weight:700;margin-bottom:1rem}
+.ep-section{margin-bottom:1.1rem}
+.ep-section>h3{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:.5rem}
+
+/* Accordion for topics */
+.accordion-item{border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden}
+.accordion-item:first-child{border-top:1px solid rgba(255,255,255,.06)}
+.acc-trigger{width:100%;background:none;border:none;color:var(--text);padding:.6rem .2rem;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.86rem;text-align:left;transition:color .15s}
+.acc-trigger:hover{color:var(--accent2)}
+.acc-arrow{font-size:.65rem;color:var(--muted);transition:transform .25s;flex-shrink:0;margin-left:auto}
+.acc-trigger.open .acc-arrow{transform:rotate(90deg)}
+.acc-trigger.open{color:var(--accent2)}
+.acc-icon{font-size:.75rem;color:var(--accent);flex-shrink:0}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.acc-body.open{max-height:600px}
+.acc-content{padding:.1rem .2rem .75rem 1.6rem}
+.acc-explain{font-size:.83rem;color:var(--muted);line-height:1.7;margin-bottom:.6rem}
+.acc-code{background:#0d0d14;border:1px solid var(--border);border-radius:7px;padding:.65rem;font-family:var(--mono);font-size:.73rem;color:#a8ff78;line-height:1.6;overflow-x:auto;white-space:pre;margin-top:.4rem}
+.acc-tip{margin-top:.5rem;background:rgba(78,205,196,.08);border-left:2px solid var(--accent2);padding:.4rem .6rem;font-size:.78rem;color:var(--accent2);border-radius:0 5px 5px 0}
+
+.code-block{background:#0d0d14;border:1px solid var(--border);border-radius:8px;padding:.75rem;font-family:var(--mono);font-size:.75rem;color:#a8ff78;line-height:1.6;overflow-x:auto;white-space:pre}
+.exercise-box{background:rgba(124,111,247,.08);border:1px solid rgba(124,111,247,.2);border-radius:9px;padding:.8rem;font-size:.83rem;line-height:1.6}
+.ep-footer{margin-top:1.3rem;display:flex;gap:.6rem}
+.btn-primary{flex:1;padding:.6rem;background:var(--accent);border:none;color:#fff;border-radius:9px;font-size:.88rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-primary:hover{opacity:.85}
+.btn-done{background:#06d6a0}
+.btn-secondary{padding:.6rem 1rem;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:9px;font-size:.88rem;cursor:pointer}
+.btn-secondary:hover{border-color:var(--text);color:var(--text)}
+.toast{max-width:920px;margin:0 auto;padding:0 2rem;display:none}
+.toast.show{display:block}
+.toast-inner{background:rgba(6,214,160,.1);border:1px solid var(--green);border-radius:10px;padding:.6rem 1rem;display:flex;gap:8px;align-items:center;font-size:.85rem;margin-bottom:.5rem}
+.toast-icon{color:var(--green)}
+@media(max-width:600px){.grid,.controls,.phase-header,.expand-panel,.toast{padding-left:1rem;padding-right:1rem}.grid{grid-template-columns:1fr}.search-box{width:130px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">Py</div>
+      <div><div style="font-size:1rem;font-weight:700">Python 30天挑战</div><div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase">从零基础到实战能力</div></div>
+    </div>
+    <h1>系统学习 · 每日精讲</h1>
+    <div class="stats-row" id="statsRow"></div>
+  </div>
+</div>
+<div class="progress-section">
+  <div class="progress-inner">
+    <div class="progress-label"><span>总体进度</span><span id="progressText">0 / 30 天完成</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+<div class="controls">
+  <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+  <button class="filter-btn" onclick="setFilter('available',this)">可学习</button>
+  <button class="filter-btn" onclick="setFilter('completed',this)">已完成</button>
+  <button class="filter-btn" onclick="setFilter('today',this)">今日任务</button>
+  <input class="search-box" placeholder="🔍 搜索主题..." oninput="doSearch(this.value)"/>
+</div>
+<div class="toast" id="toast"><div class="toast-inner"><span class="toast-icon">✓</span><span id="toastMsg"></span></div></div>
+<div id="mainContent"></div>
+
+<script>
+// ─── CURRICULUM DATA ──────────────────────────────────────────────────────────
+// topics is now array of {name, explain, code?, tip?}
+const curriculum = [
+ {phase:"第一阶段：Python基础",color:"#7c6ff7",days:[
+  {day:1,title:"Python环境搭建与Hello World",tags:["环境配置","基础"],
+   topics:[
+    {name:"安装Python 3.x",explain:"前往 python.org 下载最新版本（3.11+）。安装时勾选「Add Python to PATH」，安装完成后在终端输入 python --version 验证。",code:"# 终端中验证安装\n$ python --version\nPython 3.11.0",tip:"Windows用户建议用 Python Launcher (py 命令)，macOS推荐用Homebrew: brew install python3"},
+    {name:"安装VS Code + Python插件",explain:"VS Code是目前最推荐的Python编辑器。安装后在扩展市场搜索「Python」（Microsoft官方插件），它提供语法高亮、自动补全、调试等功能。"},
+    {name:"解释器 vs 编译器",explain:"Python是解释型语言：代码逐行被解释器读取并立即执行，不需要事先编译成二进制。这让调试更方便，但运行速度比C/Java慢。",tip:"类比：编译器像是把整本书翻译好再读；解释器像是边说边翻译"},
+    {name:"运行第一个程序",explain:"创建文件 hello.py，写入代码后，在终端 cd 到该目录，执行 python hello.py 运行。也可以在VS Code直接按右上角运行按钮。",code:'# hello.py\nprint("Hello, World!")\nprint("你好，Python！")'},
+    {name:"print() 函数",explain:"print() 是最基础的输出函数。可以输出任意数量的参数，默认用空格分隔，末尾换行。",code:'print("Hello")               # 输出一个值\nprint("姓名:", "Rick")        # 多个值，空格分隔\nprint("A", "B", sep="-")     # 自定义分隔符\nprint("不换行", end="")       # 不换行'},
+    {name:"注释的写法",explain:"注释不会被执行，用来解释代码。养成写注释的好习惯是专业开发者的基本素养。",code:'# 这是单行注释\n\n"""\n这是多行注释（其实是字符串字面量）\n常用来写函数说明\n"""'}
+   ],
+   code:'print("Hello, World!")\nprint("你好，Python！")\n# 修改引号里的内容就能改变输出',
+   exercise:"安装好Python和VS Code，新建 hello.py，输出你的名字和今天的日期。运行成功截图留存！"},
+
+  {day:2,title:"变量、数据类型与基本运算",tags:["变量","数据类型"],
+   topics:[
+    {name:"变量命名规则",explain:"变量名只能包含字母、数字、下划线，不能以数字开头，不能使用Python关键字（如 if/for/class）。推荐用小写加下划线的风格（snake_case）。",code:'my_name = "Rick"    # 推荐\nmyName = "Rick"     # 也可以，但Python社区不推荐\n# 2name = "错误"    # 不合法！',tip:"好的命名让代码自解释：user_age 比 a 好100倍"},
+    {name:"整数 int 与浮点数 float",explain:"int 是没有小数点的数字；float 是有小数点的数字。两者可以混合运算，结果自动变为float。",code:'age = 28           # int\nheight = 1.78      # float\nresult = age + height  # → 29.78，自动成float\nprint(type(age))   # <class "int">'},
+    {name:"字符串 str",explain:"字符串是用引号包裹的文本，单双引号均可。字符串是不可变的（immutable），不能直接修改某个字符。",code:'name = "Rick"\nalso = \'Rick\'      # 单双引号都行\nmulti = """第一行\n第二行"""           # 多行字符串'},
+    {name:"布尔值 bool",explain:"bool只有两个值：True 和 False（注意大写）。布尔值是比较运算的结果，也是条件判断的基础。",code:'is_learning = True\nis_done = False\nprint(10 > 5)      # True\nprint(type(True))  # <class "bool">'},
+    {name:"type() 查看类型",explain:"type() 函数返回变量的数据类型，调试时非常有用。",code:'print(type(42))       # <class "int">\nprint(type(3.14))     # <class "float">\nprint(type("hello"))  # <class "str">\nprint(type(True))     # <class "bool">'},
+    {name:"算术运算符",explain:"Python支持7种基本算术运算。其中整除(//)和取余(%)在编程中非常常用。",code:'print(10 + 3)   # 13  加\nprint(10 - 3)   # 7   减\nprint(10 * 3)   # 30  乘\nprint(10 / 3)   # 3.333... 除（结果是float）\nprint(10 // 3)  # 3   整除（向下取整）\nprint(10 % 3)   # 1   取余\nprint(2 ** 8)   # 256 幂运算',tip:"技巧：判断奇偶用 n % 2，等于0是偶数，等于1是奇数"}
+   ],
+   code:'name = "Rick"\nage = 28\nheight = 1.78\nis_learning = True\nprint(f"{name} | {age}岁 | {height}m | 在学习:{is_learning}")',
+   exercise:"创建变量存储你的姓名、年龄、身高，计算并打印：你出生至今大约多少天（年龄×365）。"},
+
+  {day:3,title:"字符串操作与格式化",tags:["字符串","格式化"],
+   topics:[
+    {name:"字符串切片 s[start:end:step]",explain:"切片可以提取字符串的一部分。索引从0开始，负数从末尾倒数。start包含，end不包含。",code:'s = "Hello Python"\nprint(s[0])      # H      （第1个字符）\nprint(s[-1])     # n      （最后一个）\nprint(s[0:5])    # Hello  （索引0到4）\nprint(s[6:])     # Python （从6到末尾）\nprint(s[::-1])   # nohtyP olleH （反转）',tip:"记忆口诀：[开始:结束:步长]，不写就是默认值"},
+    {name:"常用字符串方法",explain:"字符串对象内置了大量实用方法，掌握这些能大幅提升文本处理效率。",code:'s = "  Hello, Python!  "\nprint(s.upper())          # 全大写\nprint(s.lower())          # 全小写\nprint(s.strip())          # 去掉首尾空格\nprint(s.replace("Python","World"))\nprint(s.split(","))       # 按逗号分割→列表\nprint("Python" in s)      # True，包含判断\nprint(s.count("l"))       # 统计出现次数'},
+    {name:"f-string 格式化（推荐）",explain:"f-string（格式化字符串字面量）是Python 3.6+引入的最现代、最推荐的字符串格式化方式。在字符串前加f，花括号内可以写任意表达式。",code:'name = "Rick"\nage = 28\nprint(f"我叫{name}")\nprint(f"今年{age}岁，10年后{age+10}岁")\nprint(f"圆周率约 {3.14159:.2f}")  # 保留2位小数\nprint(f"{"居中":^20}")            # 文字居中',tip:"f-string是目前最推荐的格式化方式，比%格式化和.format()更简洁易读"},
+    {name:"len() 函数",explain:"len() 返回序列（字符串、列表等）的长度，即元素数量。对字符串来说就是字符数。",code:'print(len("Hello"))        # 5\nprint(len("你好"))          # 2（中文每个字算1个）\nprint(len(""))             # 0（空字符串）'}
+   ],
+   code:'name = "Rick Chen"\nprint(f"全名: {name}")\nprint(f"长度: {len(name)} 个字符")\nprint(f"大写: {name.upper()}")\nprint(f"名字: {name.split()[0]}")\nprint(f"反转: {name[::-1]}")',
+   exercise:"用f-string格式化一段自我介绍：包含姓名、职业、学Python的第几天、今日日期（用datetime模块获取）。"},
+
+  {day:4,title:"列表 List",tags:["列表","数据结构"],
+   topics:[
+    {name:"创建和访问列表",explain:"列表是有序的、可变的数据集合，可以存放任意类型的元素，用方括号[]创建。",code:'skills = ["Python", "HTML", "Arduino"]\nprint(skills[0])    # Python（第1个）\nprint(skills[-1])   # Arduino（最后一个）\nprint(skills[1:3])  # ["HTML","Arduino"]（切片）\nmixed = [1, "hello", True, 3.14]  # 混合类型'},
+    {name:"增删元素",explain:"列表是可变的（mutable），可以动态增加和删除元素。",code:'nums = [1, 2, 3]\nnums.append(4)       # 末尾加：[1,2,3,4]\nnums.insert(1, 99)   # 指定位置：[1,99,2,3,4]\nnums.remove(99)      # 按值删除\nlast = nums.pop()    # 删并返回末尾元素→4\nprint(nums)          # [1,2,3]',tip:"append()是最常用的添加方式；pop()默认删最后一个，pop(0)删第一个"},
+    {name:"常用列表方法",explain:"列表提供了丰富的内置方法用于排序、查找、统计等操作。",code:'nums = [3,1,4,1,5,9,2,6]\nnums.sort()              # 原地排序\nprint(nums)              # [1,1,2,3,4,5,6,9]\nprint(sorted(nums, reverse=True))  # 降序（不修改原列表）\nprint(nums.count(1))     # 统计1出现几次→2\nprint(nums.index(5))     # 5在哪个位置→4\nprint(len(nums))         # 长度→8'},
+    {name:"列表推导式",explain:"列表推导式是Python最优雅的特性之一，用一行代码创建列表，比for循环更简洁高效。",code:'# 普通写法\nsquares = []\nfor x in range(10):\n    squares.append(x**2)\n\n# 列表推导式（推荐）\nsquares = [x**2 for x in range(10)]\nevens = [x for x in range(20) if x%2==0]\nwords = ["hello","world"]\nupper = [w.upper() for w in words]',tip:"公式：[表达式 for 变量 in 可迭代对象 if 条件]，条件部分可选"}
+   ],
+   code:'skills = ["Python", "HTML", "Arduino"]\nskills.append("ESP32")\nskills.sort()\nprint("我的技能:")\nfor i, s in enumerate(skills, 1):\n    print(f"  {i}. {s}")',
+   exercise:"创建你的技能清单列表，添加3个想学的技能，删除1个，按字母排序打印，最后用列表推导式生成所有技能名称的长度列表。"},
+
+  {day:5,title:"字典 Dict 与集合 Set",tags:["字典","集合"],
+   topics:[
+    {name:"字典的创建与访问",explain:"字典是键值对（key-value）的集合，通过键来快速查找对应的值。键必须唯一且不可变（字符串、数字最常用）。",code:'person = {"name":"Rick","age":28,"city":"LA"}\nprint(person["name"])     # Rick（按键访问）\nprint(person.get("job")) # None（键不存在不报错）\nprint(person.get("job","未设置"))  # 默认值\n\n# 修改和添加\nperson["age"] = 29\nperson["job"] = "Producer"'},
+    {name:"遍历字典",explain:"字典提供三种遍历方式：只遍历键、只遍历值、同时遍历键值对。",code:'info = {"name":"Rick","age":28}\nfor key in info.keys():\n    print(key)\nfor val in info.values():\n    print(val)\nfor k, v in info.items():  # 最常用\n    print(f"{k}: {v}")'},
+    {name:"字典推导式",explain:"类似列表推导式，字典也支持一行创建，非常实用。",code:'# 列表转字典\nkeys = ["a","b","c"]\nvals = [1,2,3]\nd = {k:v for k,v in zip(keys,vals)}\n# {"a":1,"b":2,"c":3}\n\n# 过滤字典\nscores = {"Alice":90,"Bob":60,"Charlie":85}\npassed = {k:v for k,v in scores.items() if v>=80}'},
+    {name:"集合 Set 的特性与运算",explain:"集合是无序的、不重复的元素集合。最大用途：快速去重、集合运算（交集/并集/差集）。",code:'tags = ["ESP32","Python","ESP32","Arduino","Python"]\nunique = set(tags)   # 自动去重\nprint(unique)        # {"Arduino","ESP32","Python"}\n\na = {1,2,3,4}\nb = {3,4,5,6}\nprint(a | b)  # 并集 {1,2,3,4,5,6}\nprint(a & b)  # 交集 {3,4}\nprint(a - b)  # 差集 {1,2}',tip:"in 操作：列表是O(n)线性查找，集合和字典是O(1)常数时间，数据量大时用集合/字典快得多"}
+   ],
+   code:'movie = {\n    "title":"Inception",\n    "director":"Christopher Nolan",\n    "year":2010,\n    "rating":8.8\n}\nfor k,v in movie.items():\n    print(f"  {k:10}: {v}")',
+   exercise:"创建一个电影信息字典，格式化打印；再创建两个演员集合，用集合运算找出两部电影的共同演员。"},
+
+  {day:6,title:"条件语句 if / elif / else",tags:["控制流","条件"],
+   topics:[
+    {name:"if / elif / else 基础语法",explain:"Python用缩进（4个空格）来表示代码块，不需要花括号。elif是else if的缩写，可以有多个elif。",code:'score = 85\nif score >= 90:\n    grade = "A"\nelif score >= 80:\n    grade = "B"\nelif score >= 70:\n    grade = "C"\nelse:\n    grade = "F"\nprint(f"成绩{score}分 → 等级{grade}")'},
+    {name:"比较运算符",explain:"比较运算符返回布尔值，是条件判断的基础。",code:'print(5 == 5)   # True  等于（注意是两个=）\nprint(5 != 3)   # True  不等于\nprint(5 > 3)    # True  大于\nprint(5 < 3)    # False 小于\nprint(5 >= 5)   # True  大于等于\nprint(5 <= 4)   # False 小于等于\nprint("a" in ["a","b"])  # True  包含',tip:"常见错误：把赋值的=和比较的==弄混，if a = 5 会报错"},
+    {name:"逻辑运算符 and / or / not",explain:"用于组合多个条件。and：全真才真；or：有一个真就真；not：取反。",code:'age = 20\nhas_id = True\n\n# and：两个条件都要满足\nif age >= 18 and has_id:\n    print("可以入场")\n\n# or：满足一个即可\nif age < 13 or age > 65:\n    print("享受优惠票")\n\n# not：取反\nif not has_id:\n    print("请出示证件")'},
+    {name:"三元表达式（条件表达式）",explain:"Python的三元表达式让简单的if-else可以写成一行，非常简洁。",code:'age = 20\n# 标准写法\nif age >= 18:\n    status = "成年"\nelse:\n    status = "未成年"\n\n# 三元表达式（等价）\nstatus = "成年" if age >= 18 else "未成年"\nprint(status)  # 成年',tip:"公式：值A if 条件 else 值B。条件为真取值A，否则取值B"}
+   ],
+   code:'year = 2024\nif year % 400 == 0:\n    result = "闰年"\nelif year % 100 == 0:\n    result = "不是闰年"\nelif year % 4 == 0:\n    result = "闰年"\nelse:\n    result = "不是闰年"\nprint(f"{year}年是{result}")',
+   exercise:"写一个BMI计算器：输入身高（米）和体重（公斤），计算BMI，用if-elif判断并打印：偏瘦/正常/超重/肥胖。"},
+
+  {day:7,title:"循环 for / while 与推导式",tags:["循环","迭代"],
+   topics:[
+    {name:"for 循环基础",explain:"for循环用于遍历任何可迭代对象（列表、字符串、字典、range等）。是Python中最常用的循环。",code:'fruits = ["苹果","香蕉","橙子"]\nfor fruit in fruits:\n    print(fruit)\n\n# 遍历字符串\nfor char in "Python":\n    print(char, end=" ")  # P y t h o n\n\n# 遍历字典\nfor k, v in {"a":1,"b":2}.items():\n    print(f"{k}={v}")'},
+    {name:"range() 函数",explain:"range()生成一个数字序列，是for循环的好搭档。range(stop)、range(start,stop)、range(start,stop,step)。",code:'for i in range(5):       # 0,1,2,3,4\n    print(i)\n\nfor i in range(1,6):     # 1,2,3,4,5\n    print(i)\n\nfor i in range(0,10,2):  # 0,2,4,6,8（步长2）\n    print(i)\n\nfor i in range(5,0,-1):  # 5,4,3,2,1（倒数）\n    print(i)'},
+    {name:"enumerate() 与 zip()",explain:"enumerate()给迭代加上序号；zip()把多个列表并行迭代。这两个内置函数极其实用。",code:'skills = ["Python","Git","Linux"]\n# enumerate：同时获取索引和值\nfor i, skill in enumerate(skills, 1):\n    print(f"{i}. {skill}")\n\n# zip：并行遍历两个列表\nnames = ["Alice","Bob","Charlie"]\nscores = [90, 85, 92]\nfor name, score in zip(names, scores):\n    print(f"{name}: {score}分")'},
+    {name:"while 循环与 break/continue",explain:"while循环在条件为真时重复执行。break立即退出循环，continue跳过当前轮次。",code:'n = 1\nwhile n <= 5:\n    print(n)\n    n += 1\n\n# break：找到就退出\nfor i in range(10):\n    if i == 5:\n        break      # 循环到5就停\n    print(i)\n\n# continue：跳过偶数\nfor i in range(10):\n    if i % 2 == 0:\n        continue   # 跳过偶数\n    print(i)       # 只打印奇数',tip:"while适合「不知道循环几次」的情况；for适合「遍历已知集合」的情况"},
+    {name:"列表推导式进阶",explain:"列表推导式是Python最具特色的语法，比普通for循环更简洁，性能也略优。",code:'# 基础推导式\nsquares = [x**2 for x in range(10)]\n\n# 带条件的推导式\nevens = [x for x in range(20) if x%2==0]\n\n# 嵌套推导式（矩阵展平）\nmatrix = [[1,2,3],[4,5,6],[7,8,9]]\nflat = [n for row in matrix for n in row]\n# [1,2,3,4,5,6,7,8,9]'}
+   ],
+   code:'total = sum(x for x in range(1,101) if x%3==0)\nprint(f"1-100中3的倍数之和: {total}")\n\n# 九九乘法表\nfor i in range(1,10):\n    for j in range(1,i+1):\n        print(f"{j}×{i}={i*j:2}", end=" ")\n    print()',
+   exercise:"用列表推导式生成1-100所有3的倍数，计算总和；再用嵌套for循环打印一个漂亮的九九乘法表。"},
+ ]},
+
+ {phase:"第二阶段：函数与模块化",color:"#4ecdc4",days:[
+  {day:8,title:"函数基础：定义与调用",tags:["函数","复用"],
+   topics:[
+    {name:"def 关键字与基本结构",explain:"用def定义函数，函数名后跟括号和冒号，函数体缩进。函数是「可复用的代码块」，避免重复写相同逻辑。",code:'def greet(name):\n    """向指定的人打招呼"""\n    print(f"你好，{name}！")\n\ngreet("Rick")    # 调用\ngreet("Alice")\n# → 你好，Rick！\n# → 你好，Alice！'},
+    {name:"参数与返回值",explain:"参数是函数接收的输入；return语句把结果返回给调用者。没有return语句的函数默认返回None。",code:'def add(a, b):\n    return a + b\n\nresult = add(3, 5)   # result = 8\nprint(result)\n\ndef no_return():\n    x = 42            # 没有return\n\nprint(no_return())   # None'},
+    {name:"默认参数与关键字参数",explain:"参数可以有默认值，调用时可以省略；也可以用参数名来指定传值，不用管顺序。",code:'def greet(name, greeting="你好"):\n    return f"{greeting}，{name}！"\n\nprint(greet("Rick"))            # 你好，Rick！\nprint(greet("Rick", "早上好"))  # 早上好，Rick！\nprint(greet(greeting="晚安", name="Rick"))  # 关键字调用',tip:"默认参数要放在普通参数后面，否则报错"},
+    {name:"多返回值",explain:"Python函数可以返回多个值（本质是返回一个元组），调用时可以直接解包。",code:'def min_max(lst):\n    return min(lst), max(lst)   # 返回元组\n\nlo, hi = min_max([3,1,4,1,5,9])  # 解包\nprint(f"最小:{lo}, 最大:{hi}")    # 最小:1, 最大:9\n\n# 也可以不解包\nresult = min_max([3,1,4])\nprint(result)  # (1, 4)'}
+   ],
+   code:'def celsius_to_fahrenheit(c):\n    """摄氏度转华氏度"""\n    return c * 9/5 + 32\n\ndef fahrenheit_to_celsius(f):\n    """华氏度转摄氏度"""\n    return (f - 32) * 5/9\n\nprint(f"100°C = {celsius_to_fahrenheit(100):.1f}°F")\nprint(f"212°F = {fahrenheit_to_celsius(212):.1f}°C")',
+   exercise:"写温度转换函数（支持C↔F互转）；再写一个 is_prime(n) 函数判断是否为素数，测试1-20的所有数。"},
+
+  {day:9,title:"高阶函数：lambda / map / filter",tags:["函数式","高阶"],
+   topics:[
+    {name:"lambda 匿名函数",explain:"lambda创建一个简单的匿名函数，语法：lambda 参数: 表达式。适合逻辑简单、只用一次的场景。",code:'# 普通函数\ndef double(x):\n    return x * 2\n\n# 等价的lambda\ndouble = lambda x: x * 2\nadd = lambda x, y: x + y\n\nprint(double(5))     # 10\nprint(add(3, 4))     # 7',tip:"lambda只能写单个表达式，复杂逻辑还是用def定义"},
+    {name:"map() — 批量转换",explain:"map()对可迭代对象的每个元素应用函数，返回一个map对象（用list()转换）。",code:'nums = [1, 2, 3, 4, 5]\n\n# 每个元素乘以2\ndoubled = list(map(lambda x: x*2, nums))\nprint(doubled)  # [2, 4, 6, 8, 10]\n\n# 把字符串列表转为整数\nstrs = ["1","2","3","4"]\nnums = list(map(int, strs))\nprint(nums)     # [1, 2, 3, 4]'},
+    {name:"filter() — 过滤元素",explain:"filter()用函数对每个元素判断，返回满足条件（函数返回True）的元素。",code:'nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n\n# 保留偶数\nevens = list(filter(lambda x: x%2==0, nums))\nprint(evens)  # [2, 4, 6, 8, 10]\n\n# 过滤空字符串\nwords = ["hello","","world","","!"]\nnon_empty = list(filter(None, words))\nprint(non_empty)  # ["hello","world","!"]'},
+    {name:"sorted() 自定义排序",explain:"sorted()支持key参数来指定排序依据，配合lambda可以实现任意复杂的排序逻辑。",code:'people = [("Alice",30),("Bob",25),("Charlie",28)]\n\n# 按年龄排序\nby_age = sorted(people, key=lambda p: p[1])\nprint(by_age)\n# [("Bob",25),("Charlie",28),("Alice",30)]\n\n# 字符串按长度排序\nwords = ["banana","apple","cherry","date"]\nby_len = sorted(words, key=len)\nprint(by_len)  # ["date","apple","banana","cherry"]',tip:"key=len 是 key=lambda x:len(x) 的简写，Python内置函数可以直接用"}
+   ],
+   code:'files = ["main.py","readme.txt","utils.py","data.csv","test.py"]\n\n# 过滤出.py文件\npy_files = list(filter(lambda f: f.endswith(".py"), files))\n# 转大写\nupper = list(map(str.upper, py_files))\n# 排序\nsorted_files = sorted(upper)\nprint(sorted_files)',
+   exercise:"有一组学生成绩字典列表，用filter过滤出及格学生，用sorted按成绩降序排列，用map格式化输出。"},
+
+  {day:10,title:"*args 与 **kwargs",tags:["函数","进阶"],
+   topics:[
+    {name:"*args — 收集位置参数",explain:"*args让函数可以接收任意数量的位置参数，在函数内部args是一个元组。",code:'def my_sum(*args):\n    print(type(args))  # <class "tuple">\n    return sum(args)\n\nprint(my_sum(1, 2, 3))       # 6\nprint(my_sum(1, 2, 3, 4, 5)) # 15\nprint(my_sum())               # 0'},
+    {name:"**kwargs — 收集关键字参数",explain:"**kwargs让函数接收任意数量的关键字参数，在函数内部kwargs是一个字典。",code:'def profile(**kwargs):\n    print(type(kwargs))  # <class "dict">\n    for k, v in kwargs.items():\n        print(f"  {k}: {v}")\n\nprofile(name="Rick", job="Producer", city="LA")\n# name: Rick\n# job: Producer\n# city: LA'},
+    {name:"参数解包 * 和 **",explain:"*用于解包列表/元组传入位置参数；**用于解包字典传入关键字参数。",code:'def add(a, b, c):\n    return a + b + c\n\nnums = [1, 2, 3]\nprint(add(*nums))     # 等同于 add(1,2,3) → 6\n\nparams = {"a":1,"b":2,"c":3}\nprint(add(**params))  # 等同于 add(a=1,b=2,c=3) → 6',tip:"参数顺序：普通参数 → *args → 带默认值参数 → **kwargs"}
+   ],
+   code:'def log(*messages, level="INFO"):\n    prefix = {"INFO":"ℹ","WARNING":"⚠","ERROR":"✗"}.get(level,"?")\n    for msg in messages:\n        print(f"[{level}] {prefix} {msg}")\n\nlog("服务器启动")\nlog("内存不足","CPU过高", level="WARNING")\nlog("连接失败", level="ERROR")',
+   exercise:"实现一个通用log函数（支持任意多条消息和level参数）；再实现一个merge_dicts函数，把多个字典合并成一个。"},
+
+  {day:11,title:"模块与标准库",tags:["模块","标准库"],
+   topics:[
+    {name:"import 语句的几种形式",explain:"Python用import导入模块。有三种写法，各有适用场景。",code:'import math                    # 导入整个模块\nfrom math import sqrt, pi      # 只导入需要的\nfrom math import sqrt as sq    # 起别名\nimport numpy as np             # 第三方库常用别名\n\nprint(math.sqrt(144))          # 12.0\nprint(sqrt(144))               # 12.0（直接用）\nprint(sq(144))                 # 12.0（别名）',tip:"不推荐 from math import *，会污染命名空间，搞不清楚函数来自哪里"},
+    {name:"datetime — 日期时间处理",explain:"datetime模块是处理日期和时间的标准库，生产中非常常用。",code:'from datetime import datetime, timedelta, date\n\nnow = datetime.now()\nprint(now)                          # 当前时间\nprint(now.strftime("%Y-%m-%d"))     # 格式化日期\nprint(now.strftime("%H:%M:%S"))     # 格式化时间\n\ntomorrow = now + timedelta(days=1)\nten_days = now + timedelta(days=10)\nprint(f"10天后: {ten_days.date()}")'},
+    {name:"os 与 pathlib — 文件系统",explain:"os模块提供操作系统接口；pathlib提供更现代的面向对象的路径操作（推荐用pathlib）。",code:'import os\nfrom pathlib import Path\n\nprint(os.getcwd())          # 当前目录\nprint(os.listdir("."))      # 列出文件\n\n# pathlib（推荐）\np = Path(".")\nfor f in p.glob("*.py"):   # 找所有.py文件\n    print(f.name)'},
+    {name:"random — 随机数",explain:"random模块提供各种随机数生成功能，游戏、测试、数据采样都会用到。",code:'import random\n\nprint(random.randint(1, 6))        # 随机整数（骰子）\nprint(random.random())             # 0-1之间的浮点\nprint(random.uniform(0, 10))      # 指定范围浮点\n\nfruits = ["苹果","香蕉","橙子","葡萄"]\nprint(random.choice(fruits))       # 随机选一个\nrandom.shuffle(fruits)             # 原地打乱\nprint(random.sample(fruits, 2))    # 随机选2个不重复'}
+   ],
+   code:'from datetime import datetime, timedelta\n\nstart = datetime(2025, 3, 20)  # 开始学习Python的日期\nnow = datetime.now()\ndays = (now - start).days\nfinish = start + timedelta(days=30)\n\nprint(f"已学习: {days} 天")\nprint(f"30天后完成: {finish.strftime(\"%Y年%m月%d日\")}")',
+   exercise:"用datetime计算你距离30岁还有多少天；用os.listdir()列出当前目录下所有文件，用pathlib过滤出.py文件。"},
+
+  {day:12,title:"文件读写操作",tags:["文件","IO"],
+   topics:[
+    {name:"open() 函数与文件模式",explain:"open()打开文件，必须指定模式：r(读)、w(写，覆盖)、a(追加)、b(二进制)。用with语句确保文件自动关闭。",code:'# 写文件（会覆盖原有内容）\nwith open("diary.txt", "w", encoding="utf-8") as f:\n    f.write("第12天：学习文件操作\\n")\n\n# 追加写入（不覆盖）\nwith open("diary.txt", "a", encoding="utf-8") as f:\n    f.write("收获很多！\\n")\n\n# 读文件\nwith open("diary.txt", "r", encoding="utf-8") as f:\n    content = f.read()    # 读全部\n    # lines = f.readlines()  # 读成列表',tip:"encoding='utf-8'非常重要，特别是有中文时，否则可能乱码"},
+    {name:"JSON 文件读写",explain:"JSON是最常用的数据交换格式，Python的json模块让读写JSON极其简单。",code:'import json\n\n# 写JSON\ndata = {"name":"Rick","skills":["Python","ESP32"],"level":3}\nwith open("profile.json","w",encoding="utf-8") as f:\n    json.dump(data, f, ensure_ascii=False, indent=2)\n\n# 读JSON\nwith open("profile.json","r",encoding="utf-8") as f:\n    loaded = json.load(f)\nprint(loaded["name"])     # Rick\nprint(loaded["skills"])   # ["Python","ESP32"]',tip:"ensure_ascii=False让中文正常显示而不是\\uXXXX；indent=2让输出格式化好看"},
+    {name:"CSV 文件读写",explain:"CSV（逗号分隔值）是数据处理中最常见的格式，Python内置csv模块处理它。",code:'import csv\n\n# 写CSV\nwith open("scores.csv","w",newline="",encoding="utf-8") as f:\n    writer = csv.writer(f)\n    writer.writerow(["姓名","分数","等级"])  # 写表头\n    writer.writerow(["Alice",90,"A"])\n    writer.writerow(["Bob",75,"B"])\n\n# 读CSV\nwith open("scores.csv","r",encoding="utf-8") as f:\n    reader = csv.DictReader(f)   # 以字典形式读\n    for row in reader:\n        print(row["姓名"], row["分数"])'}
+   ],
+   code:'import json\nfrom datetime import datetime\n\ndef add_log(content):\n    """追加一条学习日志"""\n    try:\n        with open("log.json","r",encoding="utf-8") as f:\n            logs = json.load(f)\n    except FileNotFoundError:\n        logs = []\n    logs.append({"date":datetime.now().strftime("%Y-%m-%d"),"content":content})\n    with open("log.json","w",encoding="utf-8") as f:\n        json.dump(logs, f, ensure_ascii=False, indent=2)\n    print(f"已记录：{content}")\n\nadd_log("学习了文件读写")',
+   exercise:"创建一个学习日志程序：每次运行时追加写入当天学的内容（JSON格式），并能读取展示所有历史记录，按日期排列。"},
+
+  {day:13,title:"异常处理 try / except",tags:["异常","错误处理"],
+   topics:[
+    {name:"try / except 基础",explain:"try块里的代码如果出现错误，会跳到except处理，不会让程序崩溃。这是写健壮代码的关键。",code:'# 没有异常处理：程序直接崩溃\n# print(int("abc"))  # ValueError: invalid literal\n\n# 有异常处理：优雅处理\ntry:\n    num = int("abc")\nexcept ValueError:\n    print("输入不是有效数字")\n    num = 0\n\nprint(f"num = {num}")  # num = 0'},
+    {name:"捕获多种异常 / 通用异常",explain:"可以捕获多种特定异常，也可以用Exception捕获所有异常（不推荐过度使用）。",code:'try:\n    x = int(input("输入数字: "))\n    result = 100 / x\nexcept ValueError:\n    print("请输入有效数字！")\nexcept ZeroDivisionError:\n    print("不能除以零！")\nexcept Exception as e:\n    print(f"未知错误: {type(e).__name__}: {e}")\nelse:\n    print(f"结果: {result}")  # 无异常时执行\nfinally:\n    print("程序结束")         # 无论如何都执行',tip:"else块：只有没有异常时才执行；finally块：无论如何都执行（常用于关闭资源）"},
+    {name:"raise 主动抛出异常",explain:"有时候需要主动抛出异常来告知调用者出错了，这是API设计的重要技巧。",code:'def divide(a, b):\n    if b == 0:\n        raise ValueError("除数不能为零！")\n    if not isinstance(a, (int,float)):\n        raise TypeError("参数必须是数字")\n    return a / b\n\ntry:\n    print(divide(10, 0))\nexcept ValueError as e:\n    print(f"错误: {e}")  # 错误: 除数不能为零！'}
+   ],
+   code:'def safe_read_json(filepath):\n    """安全读取JSON文件，处理所有可能的错误"""\n    try:\n        with open(filepath,"r",encoding="utf-8") as f:\n            return json.load(f)\n    except FileNotFoundError:\n        print(f"文件不存在: {filepath}")\n        return None\n    except json.JSONDecodeError as e:\n        print(f"JSON格式错误: {e}")\n        return None\n    except PermissionError:\n        print("没有读取权限")\n        return None',
+   exercise:"改造昨天的日志程序，加入完整异常处理；再写一个安全的类型转换函数safe_int(s, default=0)。"},
+
+  {day:14,title:"综合项目：命令行任务管理器",tags:["项目","综合"],
+   topics:[
+    {name:"需求分析与功能设计",explain:"在动手写代码前，先明确需求：支持哪些操作？数据怎么存储？用户界面什么样？好的需求分析能节省大量返工时间。",tip:"功能清单：1.添加任务 2.列出所有任务 3.标记完成 4.删除任务 5.保存到JSON 6.启动时自动加载"},
+    {name:"数据结构设计",explain:"合理的数据结构是程序的骨架。任务列表用列表存储，每个任务是字典。",code:'# 任务数据结构\ntask = {\n    "id": 1,\n    "title": "学习Python文件操作",\n    "done": False,\n    "created": "2025-03-20"\n}\n\n# 整体结构\ntasks = [task1, task2, task3, ...]'},
+    {name:"功能函数实现",explain:"把每个功能封装成独立函数，代码更清晰，也方便复用和测试。",code:'def load_tasks():\n    try:\n        with open("tasks.json","r") as f:\n            return json.load(f)\n    except FileNotFoundError:\n        return []\n\ndef save_tasks(tasks):\n    with open("tasks.json","w") as f:\n        json.dump(tasks, f, indent=2)\n\ndef add_task(tasks, title):\n    task = {"id":len(tasks)+1, "title":title, "done":False}\n    tasks.append(task)\n    save_tasks(tasks)\n    print(f"✓ 已添加: {title}")'},
+    {name:"主循环与用户交互",explain:"主程序用while循环持续接收用户输入，根据命令调用对应函数。",code:'def main():\n    tasks = load_tasks()\n    while True:\n        cmd = input("\\n命令(add/list/done/del/quit): ").strip()\n        if cmd == "quit": break\n        elif cmd == "add":\n            title = input("任务名称: ")\n            add_task(tasks, title)\n        elif cmd == "list":\n            list_tasks(tasks)\n        # ... 其他命令\n\nif __name__ == "__main__":\n    main()'}
+   ],
+   code:'# todo.py — 完整结构示意\nimport json\nfrom datetime import datetime\n\ndef load_tasks(): ...\ndef save_tasks(tasks): ...\ndef add_task(tasks, title): ...\ndef list_tasks(tasks): ...\ndef mark_done(tasks, task_id): ...\ndef delete_task(tasks, task_id): ...\ndef main(): ...\n\nif __name__ == "__main__":\n    main()',
+   exercise:"完整实现命令行Todo应用，支持增删查改，数据持久化到JSON。这是你第一个完整的Python项目！"},
+ ]},
+
+ {phase:"第三阶段：面向对象编程",color:"#ff6b6b",days:[
+  {day:15,title:"类与对象基础",tags:["OOP","类"],
+   topics:[
+    {name:"class 与 __init__ 构造方法",explain:"class定义一个类（蓝图），__init__是对象创建时自动调用的初始化方法，self代表对象本身。",code:'class Person:\n    def __init__(self, name, age):\n        self.name = name   # 实例属性\n        self.age = age\n\n# 创建对象（实例化）\nrick = Person("Rick", 28)\nalice = Person("Alice", 25)\n\nprint(rick.name)   # Rick\nprint(alice.age)   # 25'},
+    {name:"实例方法与 self",explain:"方法是类里定义的函数，第一个参数必须是self（代表调用它的对象）。通过self可以访问对象的属性。",code:'class Dog:\n    def __init__(self, name, breed):\n        self.name = name\n        self.breed = breed\n\n    def bark(self):\n        return f"{self.name} says: Woof!"\n\n    def info(self):\n        return f"{self.name} is a {self.breed}"\n\ndog = Dog("Rex","Golden")\nprint(dog.bark())  # Rex says: Woof!\nprint(dog.info())  # Rex is a Golden'},
+    {name:"类属性 vs 实例属性",explain:"类属性属于类本身，所有实例共享；实例属性属于每个对象，各自独立。",code:'class Student:\n    school = "Python学院"  # 类属性（共享）\n\n    def __init__(self, name):\n        self.name = name   # 实例属性（独立）\n\na = Student("Alice")\nb = Student("Bob")\nprint(a.school)    # Python学院\nprint(b.school)    # Python学院\nStudent.school = "AI学院"  # 修改类属性\nprint(a.school)    # AI学院'},
+    {name:"__str__ 与 __repr__",explain:"__str__定义print()时的显示方式；__repr__定义「官方」字符串表示，调试时用。这是让对象有可读性的重要魔法方法。",code:'class Point:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __str__(self):\n        return f"点({self.x}, {self.y})"\n\n    def __repr__(self):\n        return f"Point({self.x}, {self.y})"\n\np = Point(3, 4)\nprint(p)      # 点(3, 4)    ←用__str__\nprint(repr(p)) # Point(3, 4) ←用__repr__'}
+   ],
+   code:'class Film:\n    def __init__(self, title, director, year, rating):\n        self.title = title\n        self.director = director\n        self.year = year\n        self.rating = rating\n\n    def summary(self):\n        return f"《{self.title}》({self.year}) 导演:{self.director} 评分:{self.rating}"\n\n    def __str__(self):\n        return self.summary()\n\nf = Film("Inception","Nolan",2010,8.8)\nprint(f)',
+   exercise:"完善Film类，添加is_good()方法（评分>=8返回True）；创建5个电影对象，找出评分最高的那部。"},
+
+  {day:16,title:"继承与多态",tags:["继承","多态"],
+   topics:[
+    {name:"继承语法 class Child(Parent)",explain:"继承让子类拥有父类的所有属性和方法，并可以添加或重写。这实现了代码复用和层次结构。",code:'class Animal:\n    def __init__(self, name):\n        self.name = name\n\n    def eat(self):\n        return f"{self.name}在吃东西"\n\nclass Dog(Animal):        # Dog继承Animal\n    def bark(self):\n        return f"{self.name}：汪汪！"\n\ndog = Dog("旺财")\nprint(dog.eat())    # 继承自Animal\nprint(dog.bark())   # Dog自己的方法'},
+    {name:"super() 调用父类",explain:"super()用于调用父类的方法，最常用在__init__中扩展父类初始化。",code:'class Vehicle:\n    def __init__(self, brand, speed):\n        self.brand = brand\n        self.speed = speed\n\nclass Car(Vehicle):\n    def __init__(self, brand, speed, seats):\n        super().__init__(brand, speed)  # 调用父类__init__\n        self.seats = seats  # 扩展新属性\n\n    def info(self):\n        return f"{self.brand} | {self.speed}km/h | {self.seats}座"\n\nc = Car("Toyota", 180, 5)\nprint(c.info())'},
+    {name:"方法重写（Override）与多态",explain:"子类可以重写父类的方法，实现自己特有的行为。多态：不同子类的相同方法调用产生不同结果。",code:'class Animal:\n    def speak(self):\n        return "..."\n\nclass Dog(Animal):\n    def speak(self):      # 重写父类方法\n        return "汪汪！"\n\nclass Cat(Animal):\n    def speak(self):      # 重写父类方法\n        return "喵喵！"\n\n# 多态：同一接口，不同行为\nanimals = [Dog(), Cat(), Dog()]\nfor a in animals:\n    print(a.speak())     # 各自调用自己的speak',tip:"多态的核心价值：调用者不需要知道具体是哪种子类，统一调用相同接口"},
+    {name:"isinstance() 类型检查",explain:"isinstance()判断对象是否是某个类（或其子类）的实例，是安全编程的好工具。",code:'d = Dog()\nprint(isinstance(d, Dog))     # True\nprint(isinstance(d, Animal))  # True（因为Dog继承Animal）\nprint(isinstance(d, Cat))     # False\n\n# 实用场景：根据类型处理\ndef process(animal):\n    if isinstance(animal, Dog):\n        print("给狗洗澡")\n    elif isinstance(animal, Cat):\n        print("给猫梳毛")'}
+   ],
+   code:'class Film:\n    def __init__(self, title, year, rating):\n        self.title, self.year, self.rating = title, year, rating\n    def genre(self): return "电影"\n    def __str__(self): return f"《{self.title}》({self.year}) {self.genre()} ★{self.rating}"\n\nclass Documentary(Film):\n    def __init__(self, title, year, rating, subject):\n        super().__init__(title, year, rating)\n        self.subject = subject\n    def genre(self): return f"纪录片·{self.subject}"\n\nclass Animation(Film):\n    def genre(self): return "动画"\n\nfilms = [Documentary("地球脉动",2006,9.0,"自然"),Animation("千与千寻",2001,9.4)]\nfor f in films: print(f)',
+   exercise:"基于Film类创建Documentary和Animation子类；实现一个cinema(films)函数，接受任意类型电影列表并打印放映单。"},
+
+  {day:17,title:"特殊方法与装饰器",tags:["魔法方法","装饰器"],
+   topics:[
+    {name:"运算符重载魔法方法",explain:"通过定义特殊方法（双下划线方法），让自定义对象支持+、-、<、==等运算符。",code:'class Vector:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __add__(self, other):      # 支持 +\n        return Vector(self.x+other.x, self.y+other.y)\n\n    def __len__(self):             # 支持 len()\n        return int((self.x**2+self.y**2)**0.5)\n\n    def __repr__(self):\n        return f"Vector({self.x},{self.y})"\n\nv1, v2 = Vector(1,2), Vector(3,4)\nprint(v1 + v2)   # Vector(4,6)\nprint(len(v2))   # 5'},
+    {name:"@property 装饰器",explain:"@property让方法像属性一样访问，可以添加计算逻辑和验证，是封装的重要手段。",code:'class Circle:\n    def __init__(self, radius):\n        self._radius = radius  # _表示"内部属性"\n\n    @property\n    def radius(self):\n        return self._radius\n\n    @radius.setter\n    def radius(self, value):\n        if value < 0:\n            raise ValueError("半径不能为负")\n        self._radius = value\n\n    @property\n    def area(self):            # 只读计算属性\n        return 3.14159 * self._radius ** 2\n\nc = Circle(5)\nprint(c.area)    # 78.53...\nc.radius = 10    # 调用setter验证'},
+    {name:"装饰器的本质与实现",explain:"装饰器是一个函数，接收函数作为参数，返回一个增强版的函数。@语法是语法糖。",code:'import time\n\ndef timer(func):\n    """计时装饰器"""\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        elapsed = time.time() - start\n        print(f"{func.__name__} 耗时: {elapsed:.4f}s")\n        return result\n    return wrapper\n\n@timer\ndef slow_function():\n    time.sleep(0.1)\n    return "完成"\n\nresult = slow_function()  # 自动打印耗时',tip:"@timer等价于 slow_function = timer(slow_function)，装饰器就是给函数套了一层"}
+   ],
+   code:'def log_call(func):\n    """记录函数调用的装饰器"""\n    def wrapper(*args, **kwargs):\n        print(f"→ 调用 {func.__name__}({args},{kwargs})")\n        result = func(*args, **kwargs)\n        print(f"← 返回 {result}")\n        return result\n    return wrapper\n\n@log_call\ndef add(a, b):\n    return a + b\n\nadd(3, 5)',
+   exercise:"实现@retry(n)装饰器，函数失败时自动重试n次；给Film类添加@property的budget属性，带验证逻辑。"},
+
+  {day:18,title:"生成器与迭代器",tags:["生成器","迭代器"],
+   topics:[
+    {name:"yield 与生成器函数",explain:"用yield代替return的函数就是生成器。生成器是惰性的：每次next()才执行一步，节省内存。处理大数据时极为有用。",code:'def count_up(n):\n    """从1数到n的生成器"""\n    i = 1\n    while i <= n:\n        yield i    # 暂停并返回值\n        i += 1     # 下次next()从这里继续\n\ngen = count_up(5)\nprint(next(gen))  # 1\nprint(next(gen))  # 2\n# 或者直接for循环\nfor n in count_up(5):\n    print(n)       # 1,2,3,4,5',tip:"生成器的核心优势：无论n多大都只占O(1)内存，而列表要占O(n)内存"},
+    {name:"生成器表达式",explain:"类似列表推导式，用圆括号创建生成器，更节省内存。",code:'# 列表推导式：立即计算，全部存入内存\nnums_list = [x**2 for x in range(1000000)]\n\n# 生成器表达式：惰性计算，节省内存\nnums_gen = (x**2 for x in range(1000000))\n\n# 求和时直接用生成器更高效\ntotal = sum(x**2 for x in range(1000000))\nprint(total)'},
+    {name:"itertools 模块",explain:"itertools提供了大量高效的迭代器工具，是处理序列数据的瑞士军刀。",code:'import itertools\n\n# chain：连接多个可迭代对象\nfor x in itertools.chain([1,2], [3,4], [5]):\n    print(x)  # 1,2,3,4,5\n\n# islice：懒惰切片\nfor x in itertools.islice(range(100), 5):\n    print(x)  # 0,1,2,3,4\n\n# product：笛卡尔积\nfor pair in itertools.product("AB", [1,2]):\n    print(pair)  # (A,1)(A,2)(B,1)(B,2)'}
+   ],
+   code:'def fibonacci():\n    """无限斐波那契数列生成器"""\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a+b\n\n# 只取前10个\nimport itertools\nfib10 = list(itertools.islice(fibonacci(), 10))\nprint(fib10)  # [0,1,1,2,3,5,8,13,21,34]',
+   exercise:"写素数生成器（无限生成素数）；写一个生成器读取超大文本文件（逐行读取，不全部载入内存）。"},
+ ]},
+
+ {phase:"第四阶段：实用库与数据处理",color:"#ffd166",days:[
+  {day:19,title:"正则表达式",tags:["正则","文本处理"],
+   topics:[
+    {name:"基础元字符",explain:"正则表达式是用于匹配字符串的模式语言。掌握核心元字符是入门关键。",code:'import re\n# .  匹配任意字符（除换行）\n# *  前面的0次或多次\n# +  前面的1次或多次\n# ?  前面的0次或1次\n# ^  字符串开头\n# $  字符串结尾\n# \\d 数字 [0-9]\n# \\w 字母数字下划线\n# \\s 空白字符\n\nprint(re.match(r"\\d+", "123abc"))   # 匹配开头数字\nprint(re.search(r"\\d+", "abc123"))  # 搜索任意位置',tip:"r前缀（raw string）避免反斜杠被Python先处理，正则中几乎必加"},
+    {name:"findall 与 sub",explain:"findall找出所有匹配；sub替换匹配的内容。这两个是实际工作中用得最多的。",code:'import re\n\ntext = "联系:rick@example.com 备用:admin@test.org"\n\n# 提取所有邮箱\nemails = re.findall(r"[\\w.+-]+@[\\w-]+\\.[\\w.]+", text)\nprint(emails)  # ["rick@example.com","admin@test.org"]\n\n# 替换\nclean = re.sub(r"<.*?>", "", "<b>Hello</b> <i>World</i>")\nprint(clean)   # Hello World\n\n# 手机号格式化\nphone = re.sub(r"(\\d{3})(\\d{4})(\\d{4})", r"\\1-\\2-\\3", "13812345678")\nprint(phone)   # 138-1234-5678'},
+    {name:"分组与命名分组",explain:"用括号()创建分组，可以提取匹配的特定部分；命名分组让代码更可读。",code:'import re\n\n# 提取日期各部分\ndate_str = "今天是2025-03-20"\npattern = r"(\\d{4})-(\\d{2})-(\\d{2})"\nm = re.search(pattern, date_str)\nif m:\n    print(m.group(1))  # 2025（年）\n    print(m.group(2))  # 03（月）\n    print(m.group(3))  # 20（日）\n\n# 命名分组\npattern = r"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})"\nm = re.search(pattern, date_str)\nprint(m.group("year"))  # 2025'}
+   ],
+   code:'import re\nfrom collections import Counter\n\ndef extract_domains(text):\n    urls = re.findall(r"https?://([\\w.-]+)", text)\n    return Counter(urls)\n\ntext = "访问 https://github.com 和 https://python.org，再看 https://github.com/trending"\nprint(extract_domains(text))\n# Counter({"github.com":2,"python.org":1})',
+   exercise:"写函数：1)验证邮箱格式是否合法；2)从HTML文本提取所有href链接；3)把手机号中间4位替换为****。"},
+
+  {day:20,title:"网络请求：requests",tags:["HTTP","requests"],
+   topics:[
+    {name:"GET 请求基础",explain:"requests库是Python最流行的HTTP库，比内置urllib简单10倍。用pip install requests安装。",code:'import requests\n\n# 基础GET请求\nresp = requests.get("https://api.github.com/users/torvalds")\nprint(resp.status_code)   # 200\nprint(resp.headers["content-type"])\n\n# 解析JSON响应\ndata = resp.json()\nprint(data["name"])           # Linus Torvalds\nprint(data["public_repos"])   # 仓库数量\nprint(data["followers"])      # 粉丝数',tip:"总是检查status_code！200=成功，4xx=客户端错误，5xx=服务器错误"},
+    {name:"请求头与参数",explain:"headers用于伪装浏览器、传递认证信息；params用于URL查询参数。",code:'import requests\n\nheaders = {\n    "User-Agent": "Mozilla/5.0",  # 伪装浏览器\n    "Authorization": "Bearer YOUR_TOKEN"\n}\n\n# URL参数（自动编码到URL）\nparams = {"q": "python", "sort": "stars"}\nresp = requests.get(\n    "https://api.github.com/search/repositories",\n    headers=headers,\n    params=params,\n    timeout=10  # 超时设置，重要！\n)\ndata = resp.json()\nprint(data["total_count"])'},
+    {name:"异常处理",explain:"网络请求随时可能失败，健壮的代码必须处理各种网络异常。",code:'import requests\n\ndef safe_get(url, **kwargs):\n    try:\n        resp = requests.get(url, timeout=10, **kwargs)\n        resp.raise_for_status()  # 4xx/5xx自动抛异常\n        return resp.json()\n    except requests.Timeout:\n        print("请求超时")\n    except requests.HTTPError as e:\n        print(f"HTTP错误: {e.response.status_code}")\n    except requests.ConnectionError:\n        print("网络连接失败")\n    return None'}
+   ],
+   code:'import requests\n\ndef get_weather(city="Los+Angeles"):\n    url = f"https://wttr.in/{city}?format=j1"\n    try:\n        data = requests.get(url, timeout=10).json()\n        current = data["current_condition"][0]\n        temp_c = current["temp_C"]\n        desc = current["weatherDesc"][0]["value"]\n        humidity = current["humidity"]\n        print(f"📍 {city}: {temp_c}°C | {desc} | 湿度{humidity}%")\n    except Exception as e:\n        print(f"获取失败: {e}")\n\nget_weather()',
+   exercise:"用公开API获取LA天气并格式化打印；再写一个函数批量检查URL是否可访问（返回状态码字典）。"},
+
+  {day:21,title:"pandas 数据处理",tags:["pandas","数据分析"],
+   topics:[
+    {name:"DataFrame 基础操作",explain:"DataFrame是pandas的核心数据结构，类似Excel的表格。掌握它是数据分析的基础。",code:'import pandas as pd\n\n# 创建DataFrame\ndf = pd.DataFrame({\n    "名称":["Python","Arduino","ESP32","Flask"],\n    "学习天数":[30,15,10,7],\n    "难度":["中","低","中","高"]\n})\n\nprint(df.head())     # 前5行\nprint(df.shape)      # (行数,列数)\nprint(df.dtypes)     # 每列数据类型\nprint(df.describe()) # 数值列统计摘要'},
+    {name:"数据筛选与选取",explain:"掌握loc/iloc和布尔索引，是pandas最核心的操作之一。",code:'# 按列名选取\nprint(df["名称"])          # 单列（Series）\nprint(df[["名称","难度"]])  # 多列（DataFrame）\n\n# 按条件筛选（布尔索引）\nhard = df[df["难度"] == "高"]\nlong = df[df["学习天数"] > 10]\nboth = df[(df["难度"]=="中") & (df["学习天数"]>8)]\n\n# loc: 按标签，iloc: 按位置\nprint(df.loc[0, "名称"])    # 第0行，名称列\nprint(df.iloc[0:2, 0:2])   # 前2行前2列',tip:"& 表示and，| 表示or，! 表示not，条件两边加括号！"},
+    {name:"groupby 分组聚合",explain:"groupby是数据分析的核心操作：按某列分组，对每组进行统计计算。",code:'# 按难度分组，计算平均学习天数\nresult = df.groupby("难度")["学习天数"].mean()\nprint(result)\n\n# 多种聚合\nresult2 = df.groupby("难度").agg({\n    "学习天数": ["mean","sum","count"]\n})\nprint(result2)\n\n# 排序\ndf_sorted = df.sort_values("学习天数", ascending=False)\nprint(df_sorted)'}
+   ],
+   code:'import pandas as pd\n\ndf = pd.read_csv("movies.csv")  # 假设有电影数据\n# 实际可用:\ndata = {"title":["Inception","Avatar","Titanic"],"year":[2010,2009,1997],"rating":[8.8,7.8,7.9],"genre":["Sci-Fi","Sci-Fi","Romance"]}\ndf = pd.DataFrame(data)\n\nprint("平均评分:", df["rating"].mean())\nprint("\\n按类型分组:")\nprint(df.groupby("genre")["rating"].mean())\nprint("\\n评分排名:")\nprint(df.sort_values("rating", ascending=False))',
+   exercise:"下载IMDB电影数据集（小样本），用pandas分析：最高分Top10、每个年代的平均评分、评分分布直方图。"},
+
+  {day:22,title:"数据可视化：matplotlib",tags:["可视化","图表"],
+   topics:[
+    {name:"折线图与柱状图",explain:"matplotlib是Python最基础的绘图库。折线图看趋势，柱状图比较大小，是最常用的两种图表。",code:'import matplotlib.pyplot as plt\n\n# 折线图\ndays = list(range(1, 8))\nscores = [60, 65, 72, 68, 80, 85, 90]\nplt.figure(figsize=(8,4))\nplt.plot(days, scores, "b-o", linewidth=2, markersize=6)\nplt.title("一周学习进步")\nplt.xlabel("天")\nplt.ylabel("分数")\nplt.grid(alpha=0.3)\nplt.show()\n\n# 柱状图\ncategories = ["Python","数学","英语"]\nvalues = [85, 70, 90]\nplt.bar(categories, values, color=["#7c6ff7","#4ecdc4","#ff6b6b"])'},
+    {name:"plt.subplots 多图布局",explain:"subplots让你在一张图里放多个子图，方便对比展示。",code:'fig, axes = plt.subplots(1, 2, figsize=(12,4))\n\n# 左图：折线\naxes[0].plot([1,2,3,4,5],[1,4,9,16,25])\naxes[0].set_title("平方数")\n\n# 右图：饼图\naxes[1].pie([30,25,20,15,10],\n            labels=["基础","函数","OOP","库","项目"],\n            autopct="%1.0f%%")\naxes[1].set_title("课程分布")\n\nplt.tight_layout()  # 自动调整间距\nplt.savefig("report.png", dpi=150, bbox_inches="tight")\nplt.show()'},
+    {name:"中文显示设置",explain:"matplotlib默认不支持中文，需要额外配置字体。",code:'import matplotlib.pyplot as plt\nimport matplotlib\n\n# Windows\nmatplotlib.rc("font", family="SimHei")\n# macOS\n# matplotlib.rc("font", family="PingFang SC")\n# 通用方案（需安装字体文件）\nplt.rcParams["axes.unicode_minus"] = False  # 负号显示\n\nplt.title("中文标题")  # 现在可以显示中文了',tip:"如果中文方框问题，在命令行运行: python -c \"import matplotlib; print(matplotlib.matplotlib_fname())\" 找到配置文件路径"}
+   ],
+   code:'import matplotlib.pyplot as plt\nimport numpy as np\n\nfig, ((ax1,ax2),(ax3,ax4)) = plt.subplots(2,2,figsize=(12,8))\n\n# 学习曲线\ndays = range(1,31)\nscores = [50+i*1.5+np.random.randn()*5 for i in days]\nax1.plot(days,scores,color="#7c6ff7"); ax1.set_title("Learning Curve")\n\n# 阶段完成\nphases=["Basics","Functions","OOP","Libraries","Projects"]\nax2.bar(phases,[7,7,4,5,7],color="#4ecdc4"); ax2.set_title("Days per Phase")\n\n# 分布\nax3.hist(scores,bins=10,color="#ffd166"); ax3.set_title("Score Distribution")\n\n# 饼图\nax4.pie([7,7,4,5,7],labels=phases,autopct="%1.0f%%"); ax4.set_title("Curriculum")\n\nplt.tight_layout(); plt.savefig("dashboard.png",dpi=120)',
+   exercise:"生成你的学习仪表盘：包含学习曲线、各阶段完成率柱状图、时间分配饼图，保存为PNG。"},
+
+  {day:23,title:"asyncio 异步编程",tags:["并发","asyncio"],
+   topics:[
+    {name:"同步 vs 异步的概念",explain:"同步：必须等一件事完成才做下一件。异步：发起请求后不等待，继续做其他事，结果好了再处理。IO密集型任务（网络请求）用异步能大幅提速。",code:'# 同步（顺序执行）：总共需要3秒\nimport time\ndef task1(): time.sleep(1); return "结果1"\ndef task2(): time.sleep(2); return "结果2"\nresult1 = task1()  # 等1秒\nresult2 = task2()  # 再等2秒\n\n# 异步（并发执行）：总共只需要2秒！\nimport asyncio\nasync def task1(): await asyncio.sleep(1); return "结果1"\nasync def task2(): await asyncio.sleep(2); return "结果2"'},
+    {name:"async/await 基础语法",explain:"async def定义协程函数；await暂停当前协程等待结果，但不阻塞事件循环（让其他协程继续运行）。",code:'import asyncio\n\nasync def fetch_data(name, seconds):\n    print(f"开始获取 {name}...")\n    await asyncio.sleep(seconds)  # 模拟网络等待\n    print(f"完成 {name}")\n    return f"{name}的数据"\n\nasync def main():\n    # gather：并发运行多个协程\n    results = await asyncio.gather(\n        fetch_data("用户信息", 1),\n        fetch_data("订单数据", 2),\n        fetch_data("商品列表", 1.5)\n    )\n    print(results)\n\nasyncio.run(main())  # 运行事件循环',tip:"asyncio.gather()是并发执行多个协程的主要方式，类似「同时发出多个网络请求」"},
+    {name:"aiohttp 异步HTTP",explain:"requests库是同步的，异步环境要用aiohttp。pip install aiohttp。",code:'import asyncio\nimport aiohttp\nimport time\n\nasync def fetch(session, url):\n    async with session.get(url) as resp:\n        return resp.status\n\nasync def main():\n    urls = ["https://example.com"]*5\n    async with aiohttp.ClientSession() as session:\n        t = time.time()\n        results = await asyncio.gather(*[fetch(session,u) for u in urls])\n        print(f"并发完成: {time.time()-t:.2f}s")\n\nasyncio.run(main())'}
+   ],
+   code:'import asyncio, time\n\nasync def task(name, delay):\n    await asyncio.sleep(delay)\n    return f"{name} done"\n\nasync def run_concurrent():\n    t = time.time()\n    results = await asyncio.gather(\n        task("A",1), task("B",2), task("C",1)\n    )\n    print(f"并发耗时: {time.time()-t:.1f}s")  # ~2s\n    print(results)\n\nasyncio.run(run_concurrent())',
+   exercise:"对比测试：串行请求5个URL vs 异步并发请求5个URL，记录耗时差异；实现一个异步下载器。"},
+ ]},
+
+ {phase:"第五阶段：综合实战项目",color:"#06d6a0",days:[
+  {day:24,title:"Web爬虫：BeautifulSoup",tags:["爬虫","Web"],
+   topics:[
+    {name:"BeautifulSoup 解析HTML",explain:"BeautifulSoup把HTML字符串解析成可以方便查询的树形结构。pip install beautifulsoup4 lxml。",code:'from bs4 import BeautifulSoup\n\nhtml = """\n<html><body>\n  <h1 class="title">Python教程</h1>\n  <a href="https://python.org">官网</a>\n  <p id="intro">Python是优雅的语言</p>\n</body></html>\n"""\nsoup = BeautifulSoup(html, "html.parser")\nprint(soup.find("h1").text)                 # Python教程\nprint(soup.find("a")["href"])              # https://python.org\nprint(soup.find("p", id="intro").text)    # Python是优雅的语言'},
+    {name:"CSS选择器 select()",explain:"select()支持CSS选择器语法，比find更灵活，适合复杂的查找需求。",code:'# find_all：找所有匹配\nlinks = soup.find_all("a")\nfor link in links:\n    print(link.text, link.get("href"))\n\n# select：CSS选择器（更强大）\nheadings = soup.select("h1, h2, h3")     # 多种标签\nitems = soup.select(".list-item")         # class\ntitle = soup.select_one("#main-title")   # id\n\n# 属性选择\nimgs = soup.select("img[src]")           # 有src属性\nlinks = soup.select("a[href^=https]")    # href以https开头'},
+    {name:"结合requests爬取真实网页",explain:"requests获取HTML内容，BeautifulSoup解析，是最经典的爬虫组合。",code:'import requests\nfrom bs4 import BeautifulSoup\nimport time\n\nheaders = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}\n\ndef scrape_page(url):\n    resp = requests.get(url, headers=headers, timeout=10)\n    resp.raise_for_status()\n    soup = BeautifulSoup(resp.text, "html.parser")\n    return soup\n\n# 爬取HackerNews\nsoup = scrape_page("https://news.ycombinator.com")\ntitles = soup.select(".titleline a")\nfor i, t in enumerate(titles[:5], 1):\n    print(f"{i}. {t.text[:60]}")',tip:"爬取时要有礼貌：加延时 time.sleep(1)，设置User-Agent，遵守robots.txt"}
+   ],
+   code:'import requests, csv\nfrom bs4 import BeautifulSoup\n\ndef scrape_hn_top5():\n    url = "https://news.ycombinator.com"\n    resp = requests.get(url, headers={"User-Agent":"Mozilla/5.0"},timeout=10)\n    soup = BeautifulSoup(resp.text,"html.parser")\n    items = soup.select(".athing")[:5]\n    results = []\n    for item in items:\n        title_el = item.select_one(".titleline a")\n        if title_el:\n            results.append({"title":title_el.text,"url":title_el.get("href","")})\n    return results\n\nfor r in scrape_hn_top5():\n    print(r["title"][:60])',
+   exercise:"爬取一个公开数据网站（新闻标题/产品价格/职位信息），提取关键字段，存为CSV；处理分页，爬取多页数据。"},
+
+  {day:25,title:"Flask Web应用",tags:["Flask","Web开发"],
+   topics:[
+    {name:"路由与视图函数",explain:"Flask用@app.route()装饰器绑定URL和处理函数，是构建Web应用的核心。pip install flask。",code:'from flask import Flask\n\napp = Flask(__name__)\n\n@app.route("/")\ndef index():\n    return "Hello Flask!"\n\n@app.route("/user/<name>")   # URL参数\ndef user(name):\n    return f"你好，{name}！"\n\n@app.route("/api/info")      # JSON API\ndef info():\n    return {"version": "1.0", "status": "ok"}\n\nif __name__ == "__main__":\n    app.run(debug=True, port=5000)'},
+    {name:"请求处理与JSON API",explain:"构建REST API是Flask最常见的用途，用request获取请求数据，jsonify返回JSON。",code:'from flask import Flask, request, jsonify\n\napp = Flask(__name__)\ntasks = []\n\n@app.route("/tasks", methods=["GET"])\ndef get_tasks():\n    return jsonify({"tasks": tasks, "count": len(tasks)})\n\n@app.route("/tasks", methods=["POST"])\ndef add_task():\n    data = request.get_json()\n    if not data or "title" not in data:\n        return jsonify({"error": "需要title字段"}), 400\n    task = {"id": len(tasks)+1, "title": data["title"], "done": False}\n    tasks.append(task)\n    return jsonify(task), 201'},
+    {name:"错误处理与中间件",explain:"完善的API需要统一的错误处理和日志记录。",code:'from flask import Flask, jsonify\n\napp = Flask(__name__)\n\n@app.errorhandler(404)\ndef not_found(e):\n    return jsonify({"error": "资源不存在"}), 404\n\n@app.errorhandler(500)\ndef server_error(e):\n    return jsonify({"error": "服务器内部错误"}), 500\n\n@app.before_request\ndef log_request():\n    from flask import request\n    print(f"[{request.method}] {request.path}")'}
+   ],
+   code:'from flask import Flask, jsonify, request\n\napp = Flask(__name__)\ntasks = [{"id":1,"title":"学习Flask","done":False}]\n\n@app.route("/tasks", methods=["GET"])\ndef get_all(): return jsonify(tasks)\n\n@app.route("/tasks/<int:tid>", methods=["PUT"])\ndef update(tid):\n    task = next((t for t in tasks if t["id"]==tid), None)\n    if not task: return jsonify({"error":"not found"}),404\n    task.update(request.get_json())\n    return jsonify(task)\n\nif __name__ == "__main__": app.run(debug=True)',
+   exercise:"完整实现Todo REST API（GET/POST/PUT/DELETE），用curl或Postman测试；添加搜索接口 GET /tasks?q=关键词。"},
+
+  {day:26,title:"SQLite数据库",tags:["数据库","SQL"],
+   topics:[
+    {name:"SQLite基础与sqlite3模块",explain:"SQLite是内置于Python的轻量级数据库，无需安装服务器，非常适合小型项目和原型开发。",code:'import sqlite3\n\n# 连接（文件不存在会自动创建）\nconn = sqlite3.connect("movies.db")\nc = conn.cursor()\n\n# 创建表\nc.execute("""CREATE TABLE IF NOT EXISTS movies (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    title TEXT NOT NULL,\n    year INTEGER,\n    rating REAL\n)""")\n\n# 插入数据\nc.execute("INSERT INTO movies (title,year,rating) VALUES (?,?,?)",\n          ("Inception",2010,8.8))\nconn.commit()  # 别忘了提交！\nconn.close()'},
+    {name:"CRUD操作",explain:"CRUD是数据库的四种基本操作：Create（增）、Read（查）、Update（改）、Delete（删）。",code:'conn = sqlite3.connect("movies.db")\nconn.row_factory = sqlite3.Row  # 让结果可以按列名访问\nc = conn.cursor()\n\n# 查询\nrows = c.execute("SELECT * FROM movies WHERE rating>8").fetchall()\nfor row in rows:\n    print(row["title"], row["rating"])\n\n# 更新\nc.execute("UPDATE movies SET rating=9.0 WHERE title=?", ("Inception",))\n\n# 删除\nc.execute("DELETE FROM movies WHERE year < 2000")\n\nconn.commit(); conn.close()'},
+    {name:"防SQL注入",explain:"永远用参数化查询（?占位符），绝对不要用字符串拼接SQL，这会导致严重的安全漏洞。",code:'# 危险！SQL注入漏洞\nuser_input = "Inception\' OR \'1\'=\'1"\nquery = f"SELECT * FROM movies WHERE title=\'{user_input}\'"\n# 这会泄露所有数据！\n\n# 安全！参数化查询\nc.execute("SELECT * FROM movies WHERE title=?", (user_input,))\n# 参数会被自动转义，永远安全',tip:"?占位符是Python sqlite3的语法，不同数据库库可能用%s或:name，原理相同"}
+   ],
+   code:'import sqlite3\nfrom contextlib import contextmanager\n\n@contextmanager\ndef get_db(path="todo.db"):\n    conn = sqlite3.connect(path)\n    conn.row_factory = sqlite3.Row\n    try:\n        yield conn.cursor()\n        conn.commit()\n    finally:\n        conn.close()\n\nwith get_db() as c:\n    c.execute("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY, title TEXT, done INTEGER DEFAULT 0)")\n    c.execute("INSERT INTO tasks(title) VALUES(?)", ("学SQL",))\n    rows = c.execute("SELECT * FROM tasks").fetchall()\n    for r in rows: print(dict(r))',
+   exercise:"把第25天的Flask Todo API升级：用SQLite存储任务，支持数据库的增删改查，重启服务数据不丢失。"},
+
+  {day:27,title:"自动化脚本",tags:["自动化","办公"],
+   topics:[
+    {name:"openpyxl 操作Excel",explain:"openpyxl让Python读写Excel文件。pip install openpyxl。",code:'import openpyxl\nfrom datetime import datetime\n\nwb = openpyxl.Workbook()\nws = wb.active\nws.title = "学习记录"\n\n# 写表头\nws.append(["日期","主题","完成度","备注"])\n\n# 写数据\nws.append([datetime.now().strftime("%Y-%m-%d"),"自动化脚本","100%","很实用"])\n\n# 设置样式\nfor cell in ws[1]:\n    cell.font = openpyxl.styles.Font(bold=True)\n\nwb.save("report.xlsx")\nprint("Excel已生成！")'},
+    {name:"schedule 定时任务",explain:"schedule库让Python脚本定时执行任务，适合自动化报告、定时爬虫等。pip install schedule。",code:'import schedule\nimport time\n\ndef morning_report():\n    print("早报：今天天气晴，开始学习！")\n\ndef hourly_backup():\n    print("执行备份...")\n\n# 设置定时\nschedule.every().day.at("08:00").do(morning_report)\nschedule.every(1).hours.do(hourly_backup)\nschedule.every(30).minutes.do(lambda: print("30分钟提醒！"))\n\n# 运行（保持程序运行）\nwhile True:\n    schedule.run_pending()\n    time.sleep(60)'},
+    {name:"subprocess 执行系统命令",explain:"subprocess模块让Python调用系统命令，实现和操作系统的交互。",code:'import subprocess\n\n# 运行命令并捕获输出\nresult = subprocess.run(\n    ["python", "--version"],\n    capture_output=True,\n    text=True\n)\nprint(result.stdout)   # Python 3.11.0\nprint(result.returncode)  # 0表示成功\n\n# 简单运行（不捕获输出）\nsubprocess.run(["ls", "-la"])  # Linux/Mac\nsubprocess.run(["dir"], shell=True)  # Windows'}
+   ],
+   code:'import openpyxl, os\nfrom pathlib import Path\nfrom datetime import datetime\n\ndef scan_folder_to_excel(folder=".", output="file_list.xlsx"):\n    wb = openpyxl.Workbook()\n    ws = wb.active\n    ws.append(["文件名","扩展名","大小(KB)","修改时间"])\n    for f in Path(folder).iterdir():\n        if f.is_file():\n            stat = f.stat()\n            ws.append([f.name, f.suffix,\n                       round(stat.st_size/1024,2),\n                       datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d")])\n    wb.save(output)\n    print(f"已生成 {output}")\n\nscan_folder_to_excel()',
+   exercise:"写批量文件处理脚本：扫描文件夹、按类型分类移动文件、生成Excel报告；再写定时任务每小时备份指定文件夹。"},
+
+  {day:28,title:"Python与ESP32串口通信",tags:["硬件","ESP32","串口"],
+   topics:[
+    {name:"pyserial 安装与基础",explain:"pyserial是Python与串口设备通信的标准库，可以和Arduino/ESP32/树莓派等硬件交互。pip install pyserial。",code:'import serial\nimport serial.tools.list_ports\n\n# 列出所有可用串口\nports = serial.tools.list_ports.comports()\nfor p in ports:\n    print(f"{p.device}: {p.description}")\n\n# 连接串口\nser = serial.Serial(\n    port="/dev/ttyUSB0",  # Windows用 COM3 等\n    baudrate=115200,       # 波特率要与ESP32一致\n    timeout=1\n)\nprint(f"已连接: {ser.name}")'},
+    {name:"读写串口数据",explain:"串口通信是双向的：Python可以发命令给ESP32，ESP32可以发传感器数据给Python。",code:'import serial, time\n\nser = serial.Serial("/dev/ttyUSB0", 115200, timeout=1)\ntime.sleep(2)  # 等ESP32重置完成\n\n# 发送命令给ESP32\nser.write(b"LED_ON\\n")      # 发字节串\nser.write("SERVO:90\\n".encode())  # 字符串转字节\n\n# 读取ESP32发来的数据\nwhile True:\n    if ser.in_waiting > 0:\n        line = ser.readline().decode("utf-8").strip()\n        print(f"收到: {line}")\n        # 解析传感器JSON: {"temp":25.3,"pir":1}\n        import json\n        data = json.loads(line)\n        print(f"温度:{data[\"temp\"]}°C")'},
+    {name:"实时绘图（与硬件配合）",explain:"用matplotlib的animation模块实时绘制从ESP32接收的传感器数据，实现数据可视化监控。",code:'import matplotlib.pyplot as plt\nimport matplotlib.animation as animation\nimport serial, json\n\nfig, ax = plt.subplots()\nxdata, ydata = [], []\nser = serial.Serial("/dev/ttyUSB0",115200,timeout=0.1)\n\ndef update(frame):\n    if ser.in_waiting:\n        line = ser.readline().decode().strip()\n        try:\n            d = json.loads(line)\n            xdata.append(frame)\n            ydata.append(d["temp"])\n            ax.clear()\n            ax.plot(xdata[-50:],ydata[-50:])  # 最近50个点\n        except: pass\n\nani = animation.FuncAnimation(fig, update, interval=100)\nplt.show()',tip:"没有ESP32也可以用 serial 模拟器（socat等工具）或直接生成随机数据测试代码逻辑"}
+   ],
+   code:'# 无需硬件的模拟版本\nimport random, time, json\n\ndef simulate_esp32_data():\n    """模拟ESP32传来的传感器数据"""\n    return json.dumps({\n        "temp": round(20 + random.random()*10, 1),\n        "humidity": round(50 + random.random()*30, 1),\n        "pir": random.choice([0,1])\n    })\n\nprint("模拟接收传感器数据...")\nfor i in range(5):\n    data = json.loads(simulate_esp32_data())\n    print(f"[{i+1}] 温度:{data[\"temp\"]}°C 湿度:{data[\"humidity\"]}% PIR:{data[\"pir\"]}")\n    time.sleep(1)',
+   exercise:"结合你的垃圾桶项目：写Python脚本通过串口控制ESP8266的IR传感器，接收开合状态并记录到CSV；实现实时温湿度绘图。"},
+
+  {day:29,title:"Python + AI：调用LLM API",tags:["AI","Anthropic","LLM"],
+   topics:[
+    {name:"Anthropic API 基础调用",explain:"Claude API让你的Python程序拥有AI能力。pip install anthropic。",code:'import anthropic\n\nclient = anthropic.Anthropic(api_key="YOUR_KEY")\n\nmessage = client.messages.create(\n    model="claude-opus-4-5",\n    max_tokens=1024,\n    system="你是一个Python编程助手，回答简洁",\n    messages=[\n        {"role":"user","content":"什么是列表推导式？"}\n    ]\n)\n\nprint(message.content[0].text)\nprint(f"\\n消耗tokens: {message.usage}")'},
+    {name:"多轮对话（保持上下文）",explain:"通过维护messages列表实现多轮对话，把每次的问答都加入历史。",code:'import anthropic\n\nclient = anthropic.Anthropic(api_key="YOUR_KEY")\nhistory = []  # 对话历史\n\ndef chat(user_msg, system="你是Python助手"):\n    history.append({"role":"user","content":user_msg})\n    resp = client.messages.create(\n        model="claude-opus-4-5",\n        max_tokens=1024,\n        system=system,\n        messages=history\n    )\n    answer = resp.content[0].text\n    history.append({"role":"assistant","content":answer})\n    return answer\n\nprint(chat("什么是装饰器？"))\nprint(chat("给我一个实际的例子"))  # 记得上文'},
+    {name:"流式输出 streaming",explain:"流式输出让AI的回复像打字一样逐字出现，用户体验更好。",code:'import anthropic\n\nclient = anthropic.Anthropic(api_key="YOUR_KEY")\n\nwith client.messages.stream(\n    model="claude-opus-4-5",\n    max_tokens=500,\n    messages=[{"role":"user","content":"解释Python的GIL"}]\n) as stream:\n    for text in stream.text_stream:\n        print(text, end="", flush=True)  # 实时打印\nprint()  # 换行'}
+   ],
+   code:'import anthropic\n\ndef python_tutor():\n    """Python学习助手命令行版"""\n    client = anthropic.Anthropic()\n    history = []\n    system = """你是Rick的专属Python导师。\n    - 回答简洁实用，给代码示例\n    - 结合ESP32/硬件项目和影视制作场景\n    - 用中文回答"""\n\n    print("Python AI导师已启动！输入 quit 退出")\n    while True:\n        q = input("\\n你: ").strip()\n        if q.lower() == "quit": break\n        history.append({"role":"user","content":q})\n        resp = client.messages.create(model="claude-opus-4-5",max_tokens=1024,system=system,messages=history)\n        answer = resp.content[0].text\n        history.append({"role":"assistant","content":answer})\n        print(f"\\n助手: {answer}")',
+   exercise:"构建你的专属Python AI助手：支持多轮对话、流式输出、自动保存对话记录到JSON；加入代码执行功能（exec()）。"},
+
+  {day:30,title:"第30天：总结与下一步",tags:["复盘","规划"],
+   topics:[
+    {name:"代码规范 PEP8",explain:"PEP8是Python的官方代码风格指南。遵守它让你的代码更专业、更易读，团队协作必备。",code:'# 命名规范\nvariable_name = "snake_case"     # 变量/函数\nCONSTANT = 42                   # 常量全大写\nClassName = "PascalCase"        # 类名\n\n# 空格规范\nx = 1+2          # 差\nx = 1 + 2        # 好\nf(x=1)           # 关键字参数无空格\nf(x = 1)         # 差\n\n# 行长度：建议不超过79字符\n# 用 flake8 或 autopep8 自动检查/修复',tip:"安装black自动格式化：pip install black，运行 black yourfile.py 一键规范化"},
+    {name:"类型注解 Type Hints",explain:"Python 3.5+支持类型注解，让IDE能提供更好的补全和错误检测，代码可读性大幅提升。",code:'# 有了类型注解，IDE能检测错误\ndef greet(name: str, age: int) -> str:\n    return f"Hi {name}, you are {age} years old"\n\ndef process(items: list[int]) -> dict[str, int]:\n    return {"sum": sum(items), "count": len(items)}\n\n# Optional（可以是None）\nfrom typing import Optional\ndef find_user(uid: int) -> Optional[dict]:\n    ...  # 可能返回None'},
+    {name:"单元测试 pytest",explain:"测试是专业开发的标志。pytest让写测试变得简单，先写测试再写代码（TDD）是业界最佳实践。",code:'# test_calculator.py\ndef add(a, b): return a + b\n\ndef test_add_positive():\n    assert add(1, 2) == 3\n\ndef test_add_negative():\n    assert add(-1, -2) == -3\n\ndef test_add_zero():\n    assert add(0, 5) == 5\n\n# 运行: pytest test_calculator.py -v',tip:"pip install pytest，文件名以test_开头，函数名以test_开头，pytest自动发现并运行"},
+    {name:"你的下一步方向",explain:"恭喜完成30天！Python是你进入各个方向的万能钥匙，选一个最感兴趣的深入钻研。",code:'# 根据你的兴趣选择方向：\n\n# 🎬 影视制作自动化\n# → 脚本解析、字幕处理、素材管理、预算表格自动化\n\n# 🤖 ESP32/硬件\n# → MicroPython在ESP32上运行、MQTT+Home Assistant\n\n# 🎨 AI漫剧流水线\n# → CrewAI多智能体、ComfyUI API调用、自动化故事板\n\n# 🌐 Web后端\n# → FastAPI → 数据库ORM → 部署到云服务器\n\n# 📊 数据科学\n# → NumPy → Pandas进阶 → Scikit-learn → 深度学习',tip:"建议：把Python用到你现有的工作项目里！最快的学习是解决真实问题"}
+   ],
+   code:'# 你已经掌握了：\nprint("✓ 变量、数据类型、运算符")\nprint("✓ 字符串、列表、字典、集合")\nprint("✓ 条件判断、循环、推导式")\nprint("✓ 函数、lambda、装饰器、生成器")\nprint("✓ 面向对象编程")\nprint("✓ 文件、JSON、CSV操作")\nprint("✓ 网络请求、爬虫、Web API")\nprint("✓ 数据处理、可视化")\nprint("✓ 异步编程、数据库")\nprint("✓ 硬件通信、AI API调用")\nprint("\\n🎉 恭喜完成30天Python挑战！")',
+   exercise:"完成一个你自己设计的综合项目，结合ESP32垃圾桶项目或漫剧制作流水线！写README说明，推送到GitHub。"},
+ ]},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let completed = JSON.parse(localStorage.getItem("py30_done")||"[]");
+let startDate = localStorage.getItem("py30_start");
+if(!startDate){startDate=new Date().toISOString().split("T")[0];localStorage.setItem("py30_start",startDate);}
+let currentFilter="all", searchQuery="", openDay=null, openTopic=null;
+
+function getDayStatus(n){
+  if(completed.includes(n))return"completed";
+  const start=new Date(startDate),today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(start);target.setDate(start.getDate()+n-1);
+  if(target.toDateString()===today.toDateString())return"today";
+  return"available";
+}
+function toggleComplete(n){
+  if(completed.includes(n)){completed=completed.filter(d=>d!==n);}
+  else{completed.push(n);showToast(`Day ${n} 完成！🎉 坚持就是胜利！`);}
+  localStorage.setItem("py30_done",JSON.stringify(completed));
+  render();
+}
+function setFilter(f,btn){currentFilter=f;openDay=null;openTopic=null;document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");render();}
+function doSearch(q){searchQuery=q.toLowerCase();openDay=null;openTopic=null;render();}
+function showToast(msg){const t=document.getElementById("toast");document.getElementById("toastMsg").textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3500);}
+function getStreak(){if(!completed.length)return 0;const s=[...completed].sort((a,b)=>a-b);let str=0;for(let i=s.length-1;i>=0;i--){if(i===s.length-1||s[i+1]===s[i]+1)str++;else break;}return str;}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function togglePanel(n){
+  const status=getDayStatus(n);
+  if(status==="locked")return;
+  openDay=(openDay===n)?null:n;
+  openTopic=null;
+  render();
+  if(openDay){setTimeout(()=>{const el=document.getElementById("panel-"+n);if(el)el.scrollIntoView({behavior:"smooth",block:"nearest"});},60);}
+}
+function toggleTopic(dayNum,topicIdx){
+  const key=`${dayNum}-${topicIdx}`;
+  openTopic=(openTopic===key)?null:key;
+  // Update DOM without full re-render
+  const trigger=document.getElementById(`acc-t-${key}`);
+  const body=document.getElementById(`acc-b-${key}`);
+  if(!trigger||!body)return;
+  if(openTopic===key){
+    document.querySelectorAll(".acc-trigger.open").forEach(el=>el.classList.remove("open"));
+    document.querySelectorAll(".acc-body.open").forEach(el=>el.classList.remove("open"));
+    trigger.classList.add("open");body.classList.add("open");
+  } else {
+    trigger.classList.remove("open");body.classList.remove("open");
+  }
+}
+
+function buildPanel(day){
+  const isDone=completed.includes(day.day);
+  const topicsHtml=day.topics.map((t,i)=>{
+    const key=`${day.day}-${i}`;
+    const hasCode=t.code;const hasTip=t.tip;
+    return `
+    <div class="accordion-item">
+      <button class="acc-trigger" id="acc-t-${key}" onclick="toggleTopic(${day.day},${i})">
+        <span class="acc-icon">▸</span>
+        <span>${t.name}</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="acc-body" id="acc-b-${key}">
+        <div class="acc-content">
+          <div class="acc-explain">${t.explain}</div>
+          ${hasCode?`<div class="acc-code">${esc(t.code)}</div>`:""}
+          ${hasTip?`<div class="acc-tip">💡 ${t.tip}</div>`:""}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="expand-panel open" id="panel-${day.day}">
+    <div class="expand-inner">
+      <button class="ep-close" onclick="togglePanel(${day.day})">✕</button>
+      <div class="ep-day">DAY ${String(day.day).padStart(2,"0")} / 30</div>
+      <div class="ep-title">${day.title}</div>
+      <div class="ep-section">
+        <h3>今日知识点 — 点击展开详细内容</h3>
+        <div>${topicsHtml}</div>
+      </div>
+      <div class="ep-section">
+        <h3>综合代码示例</h3>
+        <div class="code-block">${esc(day.code)}</div>
+      </div>
+      <div class="ep-section">
+        <h3>今日练习</h3>
+        <div class="exercise-box">${day.exercise}</div>
+      </div>
+      <div class="ep-footer">
+        <button class="btn-primary ${isDone?"btn-done":""}" onclick="toggleComplete(${day.day})">
+          ${isDone?"✓ 已完成（点击取消）":"✓ 标记今日完成"}
+        </button>
+        <button class="btn-secondary" onclick="togglePanel(${day.day})">关闭</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const allDays=curriculum.flatMap(p=>p.days);
+  const done=completed.length;
+  const todayDay=allDays.find(d=>getDayStatus(d.day)==="today");
+  document.getElementById("statsRow").innerHTML=`
+    <div class="stat-pill"><span class="num">${done}</span> 天已完成</div>
+    <div class="stat-pill"><span class="num">${30-done}</span> 天剩余</div>
+    ${todayDay?`<div class="stat-pill">今日 <span class="num">Day ${todayDay.day}</span></div>`:""}
+    <div class="stat-pill">连续 <span class="num">${getStreak()}</span> 天</div>`;
+  const pct=Math.round(done/30*100);
+  document.getElementById("progressFill").style.width=pct+"%";
+  document.getElementById("progressText").textContent=`${done} / 30 天完成 (${pct}%)`;
+
+  let html="";
+  for(const phase of curriculum){
+    const phaseDays=phase.days.filter(d=>{
+      const st=getDayStatus(d.day);
+      if(currentFilter==="completed"&&!completed.includes(d.day))return false;
+      if(currentFilter==="available"&&!["available","today"].includes(st))return false;
+      if(currentFilter==="today"&&st!=="today")return false;
+      if(searchQuery){const hay=(d.title+d.tags.join(" ")+d.topics.map(t=>t.name).join(" ")).toLowerCase();if(!hay.includes(searchQuery))return false;}
+      return true;
+    });
+    if(!phaseDays.length)continue;
+    html+=`<div class="phase-header"><div class="phase-dot" style="background:${phase.color}"></div><div class="phase-title">${phase.phase}</div><div class="phase-line"></div></div><div class="grid">`;
+    for(const day of phaseDays){
+      const st=getDayStatus(day.day);const isDone=completed.includes(day.day);const isOpen=openDay===day.day;
+      const badge=st==="today"?`<span class="day-badge badge-today">今天</span>`:isDone?`<span class="day-badge badge-done">完成</span>`:st==="locked"?`<span class="day-badge badge-locked">未解锁</span>`:`<span class="day-badge badge-available">可学</span>`;
+      html+=`<div class="day-card ${st==="today"?"today":""} ${isDone?"completed":""} ${st==="locked"?"locked":""}" onclick="${st!=="locked"?`togglePanel(${day.day})`:""}">
+        <div class="card-header"><span class="day-num">DAY ${String(day.day).padStart(2,"0")}</span>${badge}</div>
+        <div class="card-title">${day.title}</div>
+        <div class="card-tags">${day.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+        <div class="card-topics">${day.topics.slice(0,3).map(t=>t.name).join(" · ")}${day.topics.length>3?" ···":""}</div>
+        <div class="card-footer">
+          ${st!=="locked"?`<button class="complete-btn ${isDone?"done":""}" onclick="event.stopPropagation();toggleComplete(${day.day})">${isDone?"✓ 已完成":"标记完成"}</button>
+          <button class="detail-link" onclick="event.stopPropagation();togglePanel(${day.day})">${isOpen?"收起 ▲":"展开详情 ▼"}</button>`:`<span style="font-size:.72rem;color:var(--muted)">学完前面课程解锁</span>`}
+        </div>
+      </div>`;
+    }
+    html+=`</div>`;
+    const openInPhase=phaseDays.find(d=>d.day===openDay);
+    if(openInPhase)html+=buildPanel(openInPhase);
+  }
+  if(!html)html=`<div style="text-align:center;padding:3rem;color:var(--muted)">没有找到匹配的课程</div>`;
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+function checkReminder(){
+  const allDays=curriculum.flatMap(p=>p.days);
+  const t=allDays.find(d=>getDayStatus(d.day)==="today");
+  if(t&&!completed.includes(t.day))setTimeout(()=>showToast(`今日任务：Day ${t.day} — ${t.title}`),1000);
+}
+render();checkReminder();
+</script>
+</body>
+</html>
