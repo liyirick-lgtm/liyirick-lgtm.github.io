@@ -8,7 +8,7 @@ A personal portfolio site (Producer / Developer / Builder) deployed via GitHub P
 
 - `index.html` — main portfolio markup + inline app JS. Single-page app with hash-based routing.
 - `styles.css` — all styles (split out from `index.html`).
-- `data.js` — content arrays (`prodData`, `gearData`, `devData`, `blogData`). Edit here to add/remove projects, gear, and blog posts; the renderers in `index.html` pick them up. Loaded via `<script src="data.js">` before the inline app script.
+- `data.js` — content arrays (`prodData`, `devData`). Edit here to add/remove projects; the renderers in `index.html` pick them up. Loaded via `<script src="data.js">` before the inline app script.
 - `python30days.html`, `shell30days.html` — standalone interactive learning curriculum pages (separate styling, not linked into the SPA's router).
 - `CNAME` — GitHub Pages custom domain.
 
@@ -29,19 +29,17 @@ There are no tests, linters, or CI configured.
 Despite being one file (~920 lines), `index.html` is structured as an SPA. Future edits almost always touch one of these zones — find them by line ranges via `grep`, not by file structure.
 
 ### Content data (`data.js`)
-The site is **data-driven**. Four JS arrays/objects hold all user-visible content (now in `data.js`, attached as globals):
+The site is **data-driven**. Two JS arrays hold all user-visible content (now in `data.js`, attached as globals):
 - `prodData` — production projects (filtered by `type`: drama / film / commercial)
-- `gearData` — gear inventory grouped by category (camera / lens / lighting / grip / audio)
 - `devData` — dev/hardware projects (filtered by `cat`: hw / sw), with `problem` / `solution` / `result` fields for case-study detail view
-- `blogData` — blog posts (filtered by `tag`: tech / film / life), with full HTML `body` and optional `crosslink` to a dev project
 
 Most user-facing strings are bilingual `{en, zh}` objects. The helper `t(obj)` (line ~514 of `index.html`) resolves them against `currentLang`. **When adding content, always provide both `en` and `zh`** or the other language renders empty.
 
 ### Routing & rendering
 - Hash router. URL format is `#/`, `#/<page>`, or `#/<page>/<id>` (e.g. `#/dev/dev1`). Back/forward and shareable links both work.
 - `navigate(page)` switches the active `.page` div and clears any detail. `show*Detail(id)` / `show*List()` toggle list↔detail. All three call `setHash(...)` to keep the URL in sync — `applyRoute()` is the inverse and runs on `hashchange` / `DOMContentLoaded`. The `_ignoreNextHash` flag prevents feedback loops.
-- `renderCurrentPage()` dispatches to `renderProdGrid` / `renderGear` / `renderDevGrid` / `renderBlogGrid`.
-- Filters (`filterProd`, `filterDev`, `filterBlog`, `filterGear`) mutate a module-level `*Filter` variable and re-render. Filter state is **not** persisted in the URL.
+- `renderCurrentPage()` dispatches to `renderProdGrid` / `renderDevGrid`.
+- Filters (`filterProd`, `filterDev`) mutate a module-level `*Filter` variable and re-render. Filter state is **not** persisted in the URL.
 - When adding a new top-level section, add its slug to `PAGES`; if it has list/detail, also to `DETAIL_PAGES`.
 
 ### i18n
@@ -59,6 +57,6 @@ Most user-facing strings are bilingual `{en, zh}` objects. The helper `t(obj)` (
 
 ## Editing guidance
 
-- To add a project / blog post / gear item: append to the appropriate data array. No template or component file to touch — the existing `render*` function handles layout.
+- To add a project: append to the appropriate data array. No template or component file to touch — the existing `render*` function handles layout.
 - To change layout/styling for a card type: edit the template strings inside the relevant `render*Grid` / `show*Detail` function (they build HTML via template literals).
 - The `python30days.html` and `shell30days.html` files are **independent**; they share no CSS or JS with `index.html`. Edits there don't affect the main site.

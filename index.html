@@ -36,17 +36,11 @@
     <a href="#" onclick="navigate('production');return false" data-page="production">
       <span class="en-only">Production</span><span class="zh-only">影视制片</span>
     </a>
-    <a href="#" onclick="navigate('gear');return false" data-page="gear">
-      <span class="en-only">Gear</span><span class="zh-only">器材租赁</span>
-    </a>
     <a href="#" onclick="navigate('dev');return false" data-page="dev">
       <span class="en-only">Dev</span><span class="zh-only">开发</span>
     </a>
     <a href="#" onclick="navigate('about');return false" data-page="about">
       <span class="en-only">About</span><span class="zh-only">关于我</span>
-    </a>
-    <a href="#" onclick="navigate('blog');return false" data-page="blog">
-      <span class="en-only">Blog</span><span class="zh-only">博客</span>
     </a>
   </div>
   <div class="nav-right">
@@ -64,10 +58,8 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="#" onclick="navigate('home');toggleMobile();return false">Home</a>
   <a href="#" onclick="navigate('production');toggleMobile();return false">Production</a>
-  <a href="#" onclick="navigate('gear');toggleMobile();return false">Gear</a>
   <a href="#" onclick="navigate('dev');toggleMobile();return false">Dev</a>
   <a href="#" onclick="navigate('about');toggleMobile();return false">About</a>
-  <a href="#" onclick="navigate('blog');toggleMobile();return false">Blog</a>
 </div>
 
 <!-- ===== PAGE: HOME ===== -->
@@ -120,11 +112,6 @@
           <div class="hero-card-title"><span class="en-only">Production</span><span class="zh-only">影视制片</span></div>
           <div class="hero-card-sub"><span class="en-only">Film & Media</span><span class="zh-only">短剧 · 短片 · 广告</span></div>
         </div>
-        <div class="hero-card magnetic" onclick="navigate('gear')">
-          <div class="hero-card-icon">📷</div>
-          <div class="hero-card-title"><span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span></div>
-          <div class="hero-card-sub"><span class="en-only">Camera · Light · Grip</span><span class="zh-only">摄影机 · 灯光 · Grip</span></div>
-        </div>
         <div class="hero-card magnetic" onclick="navigate('dev')">
           <div class="hero-card-icon">⚡</div>
           <div class="hero-card-title"><span class="en-only">Dev Lab</span><span class="zh-only">开发实验室</span></div>
@@ -134,11 +121,6 @@
           <div class="hero-card-icon">👤</div>
           <div class="hero-card-title"><span class="en-only">About Me</span><span class="zh-only">关于我</span></div>
           <div class="hero-card-sub"><span class="en-only">Story · Resume</span><span class="zh-only">故事 · 简历</span></div>
-        </div>
-        <div class="hero-card magnetic" onclick="navigate('blog')">
-          <div class="hero-card-icon">✍️</div>
-          <div class="hero-card-title"><span class="en-only">Blog</span><span class="zh-only">博客</span></div>
-          <div class="hero-card-sub"><span class="en-only">Notes · Thoughts</span><span class="zh-only">笔记 · 思考</span></div>
         </div>
       </div>
     </div>
@@ -191,45 +173,6 @@
     <div class="sec-pad" id="prod-detail-view" style="display:none">
       <button class="back-btn" onclick="showProdList()"><span class="arrow">←</span> <span class="en-only">Back to all projects</span><span class="zh-only">返回全部项目</span></button>
       <div class="prod-detail" id="prodDetail"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PAGE: GEAR ===== -->
-<div class="page" id="page-gear">
-  <div class="page-content">
-    <div class="breadcrumb">
-      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
-      <span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span>
-    </div>
-    <div class="sec-pad">
-      <div class="sec-header">
-        <div class="sec-label"><span class="label-line"></span><span class="label-text-film"><span class="en-only">Equipment</span><span class="zh-only">器材</span></span></div>
-        <div class="sec-title"><span class="en-only">Gear Rental</span><span class="zh-only">器材租赁</span></div>
-        <div class="sec-desc">
-          <span class="en-only">Wondrous Production G&amp;E truck rental — every item below is included with the truck. Email for rates and availability.</span>
-          <span class="zh-only">Wondrous Production 灯光车整租 — 以下器材全部包含在内。咨询档期和价格请来邮件。</span>
-        </div>
-      </div>
-      <div class="search-box">
-        <span class="search-icon">⌕</span>
-        <input type="text" id="gearSearch" oninput="filterGear()">
-      </div>
-      <div class="gear-categories" id="gearList"></div>
-      <div class="inquiry-form">
-        <h3><span class="en-only">Inquiry / Get a Quote</span><span class="zh-only">询价 / 预约咨询</span></h3>
-        <p><span class="en-only">Fill out the form and I'll get back to you within 24 hours.</span><span class="zh-only">填写以下表单，我会在 24 小时内回复。</span></p>
-        <div class="form-grid">
-          <div class="form-row"><label><span class="en-only">Name</span><span class="zh-only">姓名</span></label><input type="text"></div>
-          <div class="form-row"><label>Email</label><input type="email"></div>
-        </div>
-        <div class="form-grid">
-          <div class="form-row"><label><span class="en-only">Start Date</span><span class="zh-only">开始日期</span></label><input type="date"></div>
-          <div class="form-row"><label><span class="en-only">End Date</span><span class="zh-only">结束日期</span></label><input type="date"></div>
-        </div>
-        <div class="form-row"><label><span class="en-only">Equipment & Notes</span><span class="zh-only">器材需求 & 备注</span></label><textarea></textarea></div>
-        <button class="form-submit" onclick="alert('Message sent! (Demo)')"><span><span class="en-only">Send Inquiry</span><span class="zh-only">发送询价</span></span></button>
-      </div>
     </div>
   </div>
 </div>
@@ -327,34 +270,6 @@
         <div class="form-row"><label><span class="en-only">Message</span><span class="zh-only">留言内容</span></label><textarea></textarea></div>
         <button class="form-submit" onclick="alert('Message sent! (Demo)')"><span><span class="en-only">Send Message</span><span class="zh-only">发送留言</span></span></button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PAGE: BLOG ===== -->
-<div class="page" id="page-blog">
-  <div class="page-content">
-    <div class="breadcrumb">
-      <a href="#" onclick="navigate('home');return false">Home</a><span class="bc-sep">/</span>
-      <span class="en-only">Blog</span><span class="zh-only">博客</span>
-    </div>
-    <div class="sec-pad" id="blog-list-view">
-      <div class="sec-header">
-        <div class="sec-label"><span class="label-line"></span><span class="label-text"><span class="en-only">Writing</span><span class="zh-only">写作</span></span></div>
-        <div class="sec-title"><span class="en-only">Blog</span><span class="zh-only">博客</span></div>
-        <div class="sec-desc"><span class="en-only">Notes on filmmaking, tech DIY, and thoughts on life and management.</span><span class="zh-only">影视笔记、Tech DIY 与生活/MBA 思考。</span></div>
-      </div>
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterBlog('all',this)"><span class="en-only">All</span><span class="zh-only">全部</span></button>
-        <button class="filter-btn" onclick="filterBlog('film',this)"><span class="en-only">Film Notes</span><span class="zh-only">影视笔记</span></button>
-        <button class="filter-btn" onclick="filterBlog('tech',this)"><span class="en-only">Tech DIY</span><span class="zh-only">Tech DIY</span></button>
-        <button class="filter-btn" onclick="filterBlog('life',this)"><span class="en-only">Life / MBA</span><span class="zh-only">生活/MBA</span></button>
-      </div>
-      <div class="blog-grid" id="blogGrid"></div>
-    </div>
-    <div class="sec-pad" id="blog-detail-view" style="display:none">
-      <button class="back-btn" onclick="showBlogList()"><span class="arrow">←</span> <span class="en-only">Back to all posts</span><span class="zh-only">返回全部文章</span></button>
-      <div class="blog-detail" id="blogDetail"></div>
     </div>
   </div>
 </div>
@@ -493,7 +408,7 @@ const revealObserver = new IntersectionObserver((entries) => {
 },{threshold:0.08});
 
 function observeReveals(){
-  document.querySelectorAll('.prod-card,.dev-card,.gear-card,.blog-card,.contact-card,.timeline-item,.gallery-item').forEach(el=>{
+  document.querySelectorAll('.prod-card,.dev-card,.contact-card,.timeline-item,.gallery-item').forEach(el=>{
     el.classList.add('reveal');
     revealObserver.observe(el);
   });
@@ -507,7 +422,6 @@ function setLang(lang){
   document.documentElement.setAttribute('data-lang',lang);
   document.getElementById('langEn').classList.toggle('active',lang==='en');
   document.getElementById('langZh').classList.toggle('active',lang==='zh');
-  document.getElementById('gearSearch').placeholder=lang==='zh'?'搜索器材...':'Search equipment...';
   renderCurrentPage();
   (document.fonts?document.fonts.ready:Promise.resolve()).then(initHeroDescCanvas);
 }
@@ -515,8 +429,8 @@ function t(obj){if(!obj)return'';if(typeof obj==='string')return obj;return obj[
 
 // ===== ROUTING =====
 // Hash format: #/, #/<page>, #/<page>/<id>. Detail views are shareable / back-button safe.
-const PAGES = new Set(['home','production','gear','dev','about','blog']);
-const DETAIL_PAGES = {production:true, dev:true, blog:true};
+const PAGES = new Set(['home','production','dev','about']);
+const DETAIL_PAGES = {production:true, dev:true};
 let currentPage='home';
 let currentDetailId=null;
 let _ignoreNextHash=false;
@@ -548,9 +462,7 @@ function navigate(page){
 function renderCurrentPage(){
   switch(currentPage){
     case'production':renderProdGrid();break;
-    case'gear':renderGear();break;
     case'dev':renderDevGrid();break;
-    case'blog':renderBlogGrid();break;
   }
 }
 
@@ -570,12 +482,10 @@ function applyRoute(){
     currentDetailId=id;
     if(page==='production') showProdDetail(id);
     else if(page==='dev') showDevDetail(id);
-    else if(page==='blog') showBlogDetail(id);
   } else if(DETAIL_PAGES[page]){
     currentDetailId=null;
     if(page==='production') showProdList();
     else if(page==='dev') showDevList();
-    else if(page==='blog') showBlogList();
   }
   window.scrollTo(0,0);
   requestAnimationFrame(observeReveals);
@@ -647,24 +557,6 @@ function showProdDetail(id){
 }
 function showProdList(){currentDetailId=null;setHash(buildHash('production',null));document.getElementById('prod-list-view').style.display='';document.getElementById('prod-detail-view').style.display='none';window.scrollTo(0,0)}
 
-// ===== GEAR =====
-function renderGear(){
-  const c=document.getElementById('gearList');
-  const s=(document.getElementById('gearSearch')?.value||'').toLowerCase();
-  const labels={led:{en:'💡 LED Lighting',zh:'💡 LED 灯光'},power:{en:'⚡ Power & Distribution',zh:'⚡ 电源 & 分线'},modifier:{en:'✨ Lighting Modifiers',zh:'✨ 控光附件'},production:{en:'🎬 Production & Art',zh:'🎬 制作 & 美术'},grip:{en:'🔧 Grip & Support',zh:'🔧 Grip & 支撑'}};
-  let html='';
-  for(const[cat,items]of Object.entries(gearData)){
-    const f=items.filter(g=>g.name.toLowerCase().includes(s)||g.spec.toLowerCase().includes(s));
-    if(!f.length)continue;
-    html+=`<div><div class="gear-category-title">${t(labels[cat])}<span class="cat-count">${f.length}</span></div><div class="gear-grid">${f.map(g=>`
-      <div class="gear-card"><div class="gear-card-img">📷</div><div class="gear-card-info"><div class="gear-card-name">${g.name}</div><div class="gear-card-spec">${g.spec}</div><div class="gear-card-price">${g.price}</div></div></div>
-    `).join('')}</div></div>`;
-  }
-  c.innerHTML=html||`<p style="color:var(--muted);font-size:.85rem">${currentLang==='zh'?'没有匹配器材':'No equipment found.'}</p>`;
-  requestAnimationFrame(observeReveals);
-}
-function filterGear(){renderGear()}
-
 // ===== DEV =====
 let devFilter='all';
 function filterDev(cat,btn){
@@ -685,7 +577,6 @@ function renderDevGrid(){
       <div class="dev-card-stack">${d.stack.map(s=>`<span>${s}</span>`).join('')}</div>
       <div class="dev-card-links">
         ${d.github?`<a href="${d.github}" target="_blank" onclick="event.stopPropagation()">GitHub →</a>`:''}
-        ${d.blog?`<a href="#" onclick="event.stopPropagation();navigate('blog');setTimeout(()=>showBlogDetail('${d.blog}'),100);return false">${currentLang==='zh'?'博客 →':'Blog →'}</a>`:''}
       </div>
     </div>
   `).join('');
@@ -705,7 +596,6 @@ function showDevDetail(id){
     <div class="case-section"><div class="case-section-title"><span class="cs-line"></span><span class="cs-text">${lbl?'成果':'Result'}</span></div><div class="case-result"><p>${t(d.result)}</p></div></div>
     <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap">
       ${d.github?`<a href="${d.github}" target="_blank" class="resume-btn magnetic">🐙 GitHub Repo</a>`:''}
-      ${d.blog?`<button class="resume-btn magnetic" onclick="navigate('blog');setTimeout(()=>showBlogDetail('${d.blog}'),100)">✍️ ${lbl?'相关博客':'Blog Post'}</button>`:''}
     </div>
   `;
   document.getElementById('dev-list-view').style.display='none';
@@ -713,49 +603,6 @@ function showDevDetail(id){
   window.scrollTo(0,0);
 }
 function showDevList(){currentDetailId=null;setHash(buildHash('dev',null));document.getElementById('dev-list-view').style.display='';document.getElementById('dev-detail-view').style.display='none';window.scrollTo(0,0)}
-
-// ===== BLOG =====
-let blogFilter='all';
-function filterBlog(tag,btn){
-  blogFilter=tag;
-  btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderBlogGrid();
-  requestAnimationFrame(observeReveals);
-}
-function renderBlogGrid(){
-  const grid=document.getElementById('blogGrid');
-  const items=blogFilter==='all'?blogData:blogData.filter(b=>b.tag===blogFilter);
-  const tagLabels={film:{en:'Film Notes',zh:'影视笔记'},tech:{en:'Tech DIY',zh:'Tech DIY'},life:{en:'Life / MBA',zh:'生活/MBA'}};
-  grid.innerHTML=items.map(b=>`
-    <div class="blog-card" data-tag="${b.tag}" onclick="showBlogDetail('${b.id}')">
-      <div class="blog-card-date">${b.date}</div>
-      <div class="blog-card-title">${t(b.title)}</div>
-      <div class="blog-card-excerpt">${t(b.excerpt)}</div>
-      <div class="blog-card-tags"><span class="blog-card-tag ${b.tag}">${t(tagLabels[b.tag])}</span></div>
-      ${b.crosslink?`<div class="blog-card-crosslink">🔗 <a href="#" onclick="event.stopPropagation();navigate('${b.crosslink.type}');setTimeout(()=>showDevDetail('${b.crosslink.id}'),100);return false">${t(b.crosslink.label)}</a></div>`:''}
-      <div class="blog-card-link">${currentLang==='zh'?'阅读全文':'Read more'} →</div>
-    </div>
-  `).join('');
-  document.getElementById('blog-list-view').style.display='';
-  document.getElementById('blog-detail-view').style.display='none';
-}
-function showBlogDetail(id){
-  const b=blogData.find(x=>x.id===id);if(!b)return;
-  currentDetailId=id; setHash(buildHash('blog', id));
-  const tagLabels={film:{en:'Film Notes',zh:'影视笔记'},tech:{en:'Tech DIY',zh:'Tech DIY'},life:{en:'Life / MBA',zh:'生活/MBA'}};
-  const colors={film:'var(--film-gold)',tech:'var(--cyan)',life:'var(--purple)'};
-  document.getElementById('blogDetail').innerHTML=`
-    <div class="blog-detail-title">${t(b.title)}</div>
-    <div class="blog-detail-meta"><span class="meta-tag">${b.date}</span><span class="meta-tag" style="color:${colors[b.tag]}">${t(tagLabels[b.tag])}</span></div>
-    <div class="blog-detail-body">${t(b.body)}</div>
-    ${b.crosslink?`<div style="margin-top:2rem;padding:1.2rem 1.5rem;background:var(--card);border:1px solid var(--border);border-radius:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--cyan),var(--purple))"></div><span style="font-family:var(--mono);font-size:.6rem;color:var(--blue);letter-spacing:1.5px">🔗 ${currentLang==='zh'?'相关项目':'RELATED PROJECT'}</span><a href="#" onclick="navigate('${b.crosslink.type}');setTimeout(()=>showDevDetail('${b.crosslink.id}'),100);return false" style="display:block;margin-top:.4rem;color:var(--cyan);font-weight:500;transition:color .3s">${t(b.crosslink.label)}</a></div>`:''}
-  `;
-  document.getElementById('blog-list-view').style.display='none';
-  document.getElementById('blog-detail-view').style.display='';
-  window.scrollTo(0,0);
-}
-function showBlogList(){currentDetailId=null;setHash(buildHash('blog',null));document.getElementById('blog-list-view').style.display='';document.getElementById('blog-detail-view').style.display='none';window.scrollTo(0,0)}
 
 // ===== PRETEXT-INSPIRED CANVAS TEXT RENDERER =====
 // Inspired by chenglou/pretext: measure text via canvas (no DOM reflow)
